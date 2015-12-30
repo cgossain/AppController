@@ -1,0 +1,14 @@
+PODS:
+  - AppController (0.1.0)
+
+DEPENDENCIES:
+  - AppController (from `../`)
+
+EXTERNAL SOURCES:
+  AppController:
+    :path: ../
+
+SPEC CHECKSUMS:
+  AppController: 240decb696d0d6c08e1d0cf567cfb54264a408f9
+
+COCOAPODS: 0.39.0
