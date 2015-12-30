@@ -34,8 +34,10 @@ public class AppViewController: UIViewController {
      Transitions from the currently installed view controller to the specified view controller. If no view controller is installed, then this method simply loads the specified view controller.
      
      - parameter toViewController: The view controller to transition to.
+     - parameter animated: true if the transition should be animated, false otherwise.
+     - parameter completion: A block to be executed after the transition completes.
      */
-    public func transitionToViewController(toViewController: UIViewController, completion: (() -> Void)?) {
+    public func transitionToViewController(toViewController: UIViewController, animated: Bool, completion: (() -> Void)?) {
         // add the new controller as a child
         self.addChildViewController(toViewController)
         toViewController.view.frame = self.view.bounds
@@ -46,23 +48,19 @@ public class AppViewController: UIViewController {
             self.currentRootViewController?.willMoveToParentViewController(nil)
             
             // perform the transition
-            self.transitionFromViewController(self.currentRootViewController!,
-                toViewController: toViewController,
-                duration: 0.65,
-                options: .TransitionCrossDissolve,
-                animations: { () -> Void in
-                    
-                }) { (finished) -> Void in
-                    // "decontain" the old child view controller
-                    self.currentRootViewController?.view.removeFromSuperview()
-                    self.currentRootViewController?.removeFromParentViewController()
-                    
-                    // set the new current view controller and finish "containing" it
-                    self.currentRootViewController = toViewController
-                    toViewController.didMoveToParentViewController(self)
-                    
-                    // completion handler
-                    completion?()
+            let d = animated ? 0.65 : 0.0;
+            
+            self.transitionFromViewController(self.currentRootViewController!, toViewController: toViewController, duration: d, options: .TransitionCrossDissolve, animations: nil) { finished in
+                // "decontain" the old child view controller
+                self.currentRootViewController?.view.removeFromSuperview()
+                self.currentRootViewController?.removeFromParentViewController()
+                
+                // set the new current view controller and finish "containing" it
+                self.currentRootViewController = toViewController
+                toViewController.didMoveToParentViewController(self)
+                
+                // completion handler
+                completion?()
             }
         }
         else {

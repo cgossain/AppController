@@ -118,7 +118,7 @@ public class AppController: NSObject {
         let target = mainInterfaceViewController
         
         willLoginBlock?(targetViewController: target)
-        rootViewController.transitionToViewController(target) {
+        rootViewController.transitionToViewController(target, animated: true) {
             self.didLoginBlock?()
         }
     }
@@ -127,7 +127,7 @@ public class AppController: NSObject {
         let target = loginInterfaceViewController
         
         willLogoutBlock?(targetViewController: target)
-        rootViewController.transitionToViewController(target) {
+        rootViewController.transitionToViewController(target, animated: true) {
             self.didLogoutBlock?()
         }
     }
