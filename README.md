@@ -7,7 +7,17 @@
 
 ## Usage
 
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
+This project was originaly inspired by the architecture described in [this blog post](http://dev.teeps.org/blog/2015/3/27/how-to-architect-your-ios-app).
+
+The app controller aims to cleanup the code required to manage transitioning between a "logged out" interface and a "logged in" interface using proper iOS view controller containment. Currently it only supports loading the "logged out" and/or "logged in" interfaces from a storyboard file by specifing the storyboard identifiers of the respective interfaces.
+
+The AppController determines the "logged in" state on launch by checking calling a block that you provide. After that, to login or log out you can simply call the corresponding class methods on the AppController and the controller takes care of transitioning to the correct interface.
+
+It is a simple but powerful set of classes. The example project demonstrates the core functionality.
+
+## To-Do
+
+• Need to add the abiltiy to specify "logged out" and "logged in" interfaces programatically without using storyboards.
 
 ## Requirements
 
