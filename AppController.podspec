@@ -24,7 +24,4 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   s.source_files = 'Pod/Classes/**/*.swift'
-  s.resource_bundles = {
-    'AppController' => ['Pod/Assets/*.png']
-  }
 end
