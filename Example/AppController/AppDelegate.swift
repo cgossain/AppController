@@ -17,19 +17,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     let appController: AppController = {
-        let controller =
-        AppController(storyboardName: "Main", loginInterfaceID: kMainLoginInterfaceStoryboardIdentifier, mainInterfaceID: kMainInterfaceStoryboardIdentifier)
+        // initialize the controller form the storyboard (check out the other initalizer if you are not using storyboards)
+        let controller = AppController(storyboardName: "Main",
+                                       loginInterfaceID: kMainLoginInterfaceStoryboardIdentifier,
+                                       mainInterfaceID: kMainInterfaceStoryboardIdentifier)
         
-        // the block should return true if the current state is "logged in", and false if not "logged in"
         controller.isLoggedInBlock = {
-//            return false
-            return true
+            /// return false here to load the "login" interface, or return true to load the "main" interface
+            return false
         }
-        
         return controller
     }()
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+        // call this method to transition to the correct initial interface
         self.appController.application(application, didFinishLaunchingWithOptions: launchOptions)
         
         // set the app view controller as the root
