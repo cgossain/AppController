@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "AppController"
-  s.version          = "0.3.0"
+  s.version          = "0.3.1"
   s.summary          = "A clean and simple way to transition between a login interface and a main interface in iOS apps."
 
   s.description      = <<-DESC
