@@ -68,13 +68,8 @@ public class AppController: NSObject {
     }
     
     private let authenticationController = AuthenticationController()
-    
     private var loginInterfaceProvider: (Void -> UIViewController)
-    private var loginInterfaceViewController: UIViewController { return loginInterfaceProvider() }
-    
     private var mainInterfaceProvider: (Void -> UIViewController)
-    private var mainInterfaceViewController: UIViewController { return mainInterfaceProvider() }
-    
     private var storyboard: UIStoryboard?
     
     /**
@@ -113,23 +108,28 @@ public class AppController: NSObject {
         loginInterfaceProvider = loginProvider
         mainInterfaceProvider = mainProvider
         super.init()
-        authenticationController.onLogout = { self.transitionToLoginInterface() }
         authenticationController.onLogin = { self.transitionToMainInterface() }
+        authenticationController.onLogout = { self.transitionToLoginInterface() }
     }
+    
+    // MARK: - Public
     
     /**
      Call this method at some point in the app delegate -application:didFinishLaunchingWithOptions: method. This trggers the app controller to check the -isLoggedInBlock and load the correct interface (i.e. login interface or main interface).
      */
     public func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) {
         if isLoggedIn {
-            self.transitionToMainInterface()
-        } else {
-            self.transitionToLoginInterface()
+            transitionToMainInterface()
+        }
+        else {
+            transitionToLoginInterface()
         }
     }
     
+    // MARK: - Private
+    
     private func transitionToMainInterface() {
-        let target = mainInterfaceViewController
+        let target = mainInterfaceViewController()
         willLoginBlock?(targetViewController: target)
         rootViewController.transitionToViewController(target, animated: true) { [unowned self] in
             self.didLoginBlock?()
@@ -137,11 +137,19 @@ public class AppController: NSObject {
     }
     
     private func transitionToLoginInterface() {
-        let target = loginInterfaceViewController
+        let target = loginInterfaceViewController()
         willLogoutBlock?(targetViewController: target)
         rootViewController.transitionToViewController(target, animated: true) { [unowned self] in
             self.didLogoutBlock?()
         }
+    }
+    
+    private func mainInterfaceViewController() -> UIViewController {
+        return mainInterfaceProvider()
+    }
+    
+    private func loginInterfaceViewController() -> UIViewController {
+        return loginInterfaceProvider()
     }
     
 }
