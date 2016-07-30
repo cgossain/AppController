@@ -24,15 +24,13 @@
 public class AppViewController: UIViewController {
     
     /// Returns the view controller that is currently installed.
-    public var installedViewController: UIViewController? {
-        return self.currentRootViewController
-    }
+    public var installedViewController: UIViewController? { return self.currentRootViewController }
     
+    /// Internal reference to the installed view controller
     private var currentRootViewController: UIViewController?
     
     /**
      Transitions from the currently installed view controller to the specified view controller. If no view controller is installed, then this method simply loads the specified view controller.
-     
      - parameter toViewController: The view controller to transition to.
      - parameter animated: true if the transition should be animated, false otherwise.
      - parameter completion: A block to be executed after the transition completes.
@@ -43,24 +41,28 @@ public class AppViewController: UIViewController {
         }
         
         // add the new controller as a child
-        self.addChildViewController(toViewController)
-        toViewController.view.frame = self.view.bounds
-        self.view.addSubview(toViewController.view)
+        addChildViewController(toViewController)
+        toViewController.view.frame = view.bounds
+        view.addSubview(toViewController.view)
         
         // if there is a current view controller, transition from it to the new one
-        if self.currentRootViewController != nil {
-            self.currentRootViewController?.willMoveToParentViewController(nil)
+        if let current = currentRootViewController {
+            current.willMoveToParentViewController(nil)
+            
+            // update the current reference
+            currentRootViewController = toViewController
             
             // perform the transition
             let d = animated ? 0.65 : 0.0;
-            
-            self.transitionFromViewController(self.currentRootViewController!, toViewController: toViewController, duration: d, options: .TransitionCrossDissolve, animations: nil) { finished in
+            transitionFromViewController(current, toViewController: toViewController, duration: d, options: .TransitionCrossDissolve, animations: {
+                // animate the status bar apperance change
+                self.setNeedsStatusBarAppearanceUpdate()
+            }) { finished in
                 // "decontain" the old child view controller
-                self.currentRootViewController?.view.removeFromSuperview()
-                self.currentRootViewController?.removeFromParentViewController()
+                current.view.removeFromSuperview()
+                current.removeFromParentViewController()
                 
-                // set the new current view controller and finish "containing" it
-                self.currentRootViewController = toViewController
+                // finish "containing" the new view controller
                 toViewController.didMoveToParentViewController(self)
                 
                 // completion handler
@@ -72,7 +74,10 @@ public class AppViewController: UIViewController {
             toViewController.didMoveToParentViewController(self)
             
             // set the current view controller
-            self.currentRootViewController = toViewController
+            currentRootViewController = toViewController
+            
+            // update status bar appearance
+            setNeedsStatusBarAppearanceUpdate()
             
             // completion handler
             completion?()
@@ -81,5 +86,13 @@ public class AppViewController: UIViewController {
     
     public override func viewWillLayoutSubviews() {
         self.currentRootViewController?.view.frame = self.view.bounds
+    }
+    
+    public override func childViewControllerForStatusBarStyle() -> UIViewController? {
+        return installedViewController
+    }
+    
+    public override func childViewControllerForStatusBarHidden() -> UIViewController? {
+        return installedViewController
     }
 }
