@@ -38,6 +38,10 @@ public class AppViewController: UIViewController {
      - parameter completion: A block to be executed after the transition completes.
      */
     public func transitionToViewController(toViewController: UIViewController, animated: Bool, completion: (() -> Void)?) {
+        if toViewController.parentViewController == self {
+            return
+        }
+        
         // add the new controller as a child
         self.addChildViewController(toViewController)
         toViewController.view.frame = self.view.bounds
