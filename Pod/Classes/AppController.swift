@@ -59,9 +59,12 @@ public class AppController: NSObject {
             return storyboard.instantiateInitialViewController() as! AppViewController
         }
         
-        // if there is no storyboard, just create one
+        // if there is no storyboard, just create an instance of the app view controller
         return AppViewController()
     }()
+    
+    /// If the controller was initialized with a storyboard name, this represents the loaded storyboad instance. This value is nil if there is no storyboad.
+    public var storyboard: UIStoryboard?
     
     private var isLoggedIn: Bool {
         return self.isLoggedInBlock?() ?? false
@@ -70,7 +73,6 @@ public class AppController: NSObject {
     private let authenticationController = AuthenticationController()
     private var loginInterfaceProvider: (Void -> UIViewController)
     private var mainInterfaceProvider: (Void -> UIViewController)
-    private var storyboard: UIStoryboard?
     
     /**
      Initializes the controller using the specified storyboard name, login interface storyboard identifier and main interface storyboard identifier.
