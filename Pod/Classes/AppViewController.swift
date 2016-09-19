@@ -21,13 +21,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-public class AppViewController: UIViewController {
+open class AppViewController: UIViewController {
     
     /// Returns the view controller that is currently installed.
-    public var installedViewController: UIViewController? { return self.currentRootViewController }
+    open var installedViewController: UIViewController? { return self.currentRootViewController }
     
     /// Internal reference to the installed view controller
-    private var currentRootViewController: UIViewController?
+    fileprivate var currentRootViewController: UIViewController?
     
     /**
      Transitions from the currently installed view controller to the specified view controller. If no view controller is installed, then this method simply loads the specified view controller.
@@ -35,8 +35,8 @@ public class AppViewController: UIViewController {
      - parameter animated: true if the transition should be animated, false otherwise.
      - parameter completion: A block to be executed after the transition completes.
      */
-    public func transitionToViewController(toViewController: UIViewController, animated: Bool, completion: (() -> Void)?) {
-        if toViewController.parentViewController == self {
+    open func transitionToViewController(_ toViewController: UIViewController, animated: Bool, completion: (() -> Void)?) {
+        if toViewController.parent == self {
             return
         }
         
@@ -47,14 +47,14 @@ public class AppViewController: UIViewController {
         
         // if there is a current view controller, transition from it to the new one
         if let current = currentRootViewController {
-            current.willMoveToParentViewController(nil)
+            current.willMove(toParentViewController: nil)
             
             // update the current reference
             currentRootViewController = toViewController
             
             // perform the transition
             let d = animated ? 0.65 : 0.0;
-            transitionFromViewController(current, toViewController: toViewController, duration: d, options: .TransitionCrossDissolve, animations: {
+            transition(from: current, to: toViewController, duration: d, options: .transitionCrossDissolve, animations: {
                 // animate the status bar apperance change
                 self.setNeedsStatusBarAppearanceUpdate()
             }) { finished in
@@ -63,7 +63,7 @@ public class AppViewController: UIViewController {
                 current.removeFromParentViewController()
                 
                 // finish "containing" the new view controller
-                toViewController.didMoveToParentViewController(self)
+                toViewController.didMove(toParentViewController: self)
                 
                 // completion handler
                 completion?()
@@ -71,7 +71,7 @@ public class AppViewController: UIViewController {
         }
         else {
             // simply finish containing the view controller
-            toViewController.didMoveToParentViewController(self)
+            toViewController.didMove(toParentViewController: self)
             
             // set the current view controller
             currentRootViewController = toViewController
@@ -84,15 +84,15 @@ public class AppViewController: UIViewController {
         }
     }
     
-    public override func viewWillLayoutSubviews() {
+    open override func viewWillLayoutSubviews() {
         self.currentRootViewController?.view.frame = self.view.bounds
     }
     
-    public override func childViewControllerForStatusBarStyle() -> UIViewController? {
+    open override var childViewControllerForStatusBarStyle : UIViewController? {
         return installedViewController
     }
     
-    public override func childViewControllerForStatusBarHidden() -> UIViewController? {
+    open override var childViewControllerForStatusBarHidden : UIViewController? {
         return installedViewController
     }
 }
