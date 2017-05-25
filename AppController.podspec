@@ -1,9 +1,9 @@
 Pod::Spec.new do |s|
   s.name             = "AppController"
-  s.version          = "0.4.0"
-  s.summary          = "A clean and simple way to transition between a login interface and a main interface in iOS apps."
+  s.version          = "0.5.0"
+  s.summary          = "A simple controller to manage switching between `logged out` and `logged in` interfaces in iOS apps, written in Swift."
   s.description      = <<-DESC
-                       Many iOS applications need to implement login functionality. This project aims to provide a clean and simple architecture for doing this. The AppController is object that manages the login and main interfaces of your application.
+                       Modern iOS applications typically have the ability to login. Many apps implement this lazily by presenting a login view controller above the main app interface. This project offers a cleaner alternative with a controller that can manage transitioning to/from the required interface. This approach means that the interface that is no longer being used can be completely deallocated from memory.
                        DESC
   s.homepage         = "https://github.com/cgossain/AppController"
   s.license          = 'MIT'

@@ -9,33 +9,34 @@
 import UIKit
 import AppController
 
-let kMainLoginInterfaceStoryboardIdentifier = "loginInterfaceRootViewController"
-let kMainInterfaceStoryboardIdentifier = "mainInterfaceRootViewController"
-
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    let appController: AppController = {
-        // initialize the controller form the storyboard (check out the other initalizer if you are not using storyboards)
-        let controller = AppController(storyboardName: "Main",
-                                       loginInterfaceID: kMainLoginInterfaceStoryboardIdentifier,
-                                       mainInterfaceID: kMainInterfaceStoryboardIdentifier)
-        
-        controller.isLoggedInBlock = {
-            /// return false here to load the "login" interface, or return true to load the "main" interface
-            return false
-        }
-        return controller
+    
+    lazy var appController: AppController = {
+        return AppController(storyboardName: "Main", loggedOutInterfaceID: "loggedOutInterface", loggedInInterfaceID: "loggedInInterface")
     }()
-
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // call this method to transition to the correct initial interface
-        self.appController.application(application, didFinishLaunchingWithOptions: launchOptions)
+        // install the app controller's root view controller as the root view controller of the window
+        window?.rootViewController = appController.rootViewController
+        window?.makeKeyAndVisible()
         
-        // set the app view controller as the root
-        self.window?.rootViewController = self.appController.rootViewController
-        self.window?.makeKeyAndVisible()
+        // note that the AppController initially loads the `logged out` interface
+        // simulating an event that triggers switching to the `logged in` interface (i.e. auth observer firing, button tapped, etc.)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            // this will notify any active AppController instance to transition to the `logged in` interface
+            AppController.login()
+            
+            // now simulate the log out
+            // simulating an event that triggers switching to the `logged out` interface (i.e. auth observer firing, button tapped, etc.)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                // this will notify any active AppController instance to transition to the `logged out` interface
+                AppController.logout()
+            }
+        }
+        
         return true
     }
 
@@ -63,4 +64,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
 }
-
