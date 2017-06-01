@@ -93,4 +93,14 @@ open class AppViewController: UIViewController {
     open override var childViewControllerForStatusBarHidden : UIViewController? {
         return installedViewController
     }
+    
+    open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        // resize and animate the installed view controllers' view
+        coordinator.animate(alongsideTransition: { (context) in
+            let newFrame = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+            self.installedViewController?.view.frame = newFrame
+        }, completion: nil)
+    }
 }
