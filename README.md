@@ -47,7 +47,8 @@ class MyAwesomeInterfaceProvider: AppControllerInterfaceProviding {
     }
 
     func isInitiallyLoggedIn(for: AppController) -> Bool {
-        return false // return `true` if the "logged in" interface should be initially loaded instead
+        // return `true` if the "logged in" interface should be initially loaded instead
+        return false
     }
 
 }
@@ -67,18 +68,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     lazy var appController: AppController = {
         let controller = AppController(interfaceProvider: self.myAwesomeInterfaceProvider)
+        
+        // do stuff just before login transition...
         controller.willLoginHandler = { [unowned self] (targetViewController) in
-          // ...do stuff just before login transition
+        
         }
+        
+        // do stuff right after login transition...
         controller.didLoginHandler = { [unowned self] in
-          // ...do stuff right after login transition
+        
         }
+        
+        // do stuff just before logout transition...
         controller.willLogoutHandler = { [unowned self] (targetViewController) in
-          // ...do stuff just before logout transition
+        
         }
+        
+        // do stuff right after logout transition...
         controller.didLogoutHandler = { [unowned self] in
-          // ...do stuff right after logout transition
+        
         }
+        
         return controller
     }()
 
@@ -98,7 +108,7 @@ Transition to "logged in" interface:
 AppController.login()
 ```
 
-Transition to "logged in" interface:
+Transition to "logged out" interface:
 ```
 AppController.logout()
 ```
