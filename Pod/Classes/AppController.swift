@@ -24,6 +24,9 @@
 import UIKit
 
 public protocol AppControllerInterfaceProviding {
+    /// Return a configuration object.
+    func configuration(for appController: AppController) -> AppController.Configuration
+    
     /// Return the view controller to be installed as the "logged out" interface.
     func loggedOutInterfaceViewController(for appController: AppController) -> UIViewController
     
@@ -35,6 +38,24 @@ public protocol AppControllerInterfaceProviding {
 }
 
 public class AppController {
+    
+    public struct Configuration {
+        /// The animation duration when transitionning between logged in/out states. A duration of zero indicates no animation should occur.
+        public let transitionDuration: TimeInterval
+        
+        /// The transiton animation options.
+        public let options: UIViewAnimationOptions
+        
+        /// If `true`, a call to dismiss(animated:completion:) is made before performing the transition. Defaults to `true`.
+        /// - Note: You generally would want this to be `true`, but you have the option to disable it if needed.
+        public var dismissesPresentedViewControllerBeforeTransition = true
+        
+        /// Initializes the configuration with the given options.
+        public init(transitionDuration: TimeInterval = 0.6, options: UIViewAnimationOptions = .transitionCrossDissolve) {
+            self.transitionDuration = transitionDuration
+            self.options = options
+        }
+    }
     
     /// The object that acts as the interface provider for the controller.
     let interfaceProvider: AppControllerInterfaceProviding
@@ -141,7 +162,6 @@ public class AppController {
         NotificationCenter.default.removeObserver(logoutNotificationObserver!)
     }
     
-    
     // MARK: - Internal References
     
     fileprivate var appViewControllerClass = AppViewController.self
@@ -176,9 +196,11 @@ extension AppController {
 extension AppController {
     
     fileprivate func transitionToLoggedInInterface() {
+        let configuration = interfaceProvider.configuration(for: self)
         let target = interfaceProvider.loggedInInterfaceViewController(for: self)
         willLoginHandler?(target)
-        rootViewController.transitionToViewController(target, animated: true) { [weak self] in
+        rootViewController.dismissesPresentedViewControllerBeforeTransition = configuration.dismissesPresentedViewControllerBeforeTransition
+        rootViewController.transition(to: target, duration: configuration.transitionDuration, options: configuration.options) { [weak self] in
             guard let strongSelf = self else {
                 return
             }
@@ -188,9 +210,11 @@ extension AppController {
     }
     
     fileprivate func transitionToLoggedOutInterface() {
+        let configuration = interfaceProvider.configuration(for: self)
         let target = interfaceProvider.loggedOutInterfaceViewController(for: self)
         willLogoutHandler?(target)
-        rootViewController.transitionToViewController(target, animated: true) { [weak self] in
+        rootViewController.dismissesPresentedViewControllerBeforeTransition = configuration.dismissesPresentedViewControllerBeforeTransition
+        rootViewController.transition(to: target, duration: configuration.transitionDuration, options: configuration.options) { [weak self] in
             guard let strongSelf = self else {
                 return
             }

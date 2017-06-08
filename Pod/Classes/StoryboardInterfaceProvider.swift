@@ -37,6 +37,10 @@ class StoryboardInterfaceProvider: AppControllerInterfaceProviding {
     
     // MARK: - AppControllerInterfaceProviding
     
+    func configuration(for appController: AppController) -> AppController.Configuration {
+        return AppController.Configuration()
+    }
+    
     func loggedOutInterfaceViewController(for appController: AppController) -> UIViewController {
         return storyboard.instantiateViewController(withIdentifier: loggedOutInterfaceID)
     }

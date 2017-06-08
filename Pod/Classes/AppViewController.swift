@@ -25,16 +25,19 @@ import UIKit
 
 open class AppViewController: UIViewController {
     
+    /// If `true`, a call to dismiss(animated:completion:) is made before performing the transition. Defaults to `true`.
+    var dismissesPresentedViewControllerBeforeTransition = true
+    
     /// Returns the view controller that is currently installed.
     open private(set) var installedViewController: UIViewController?
     
-    /**
-     Transitions from the currently installed view controller to the specified view controller. If no view controller is installed, then this method simply loads the specified view controller.
-     - Parameter toViewController: The view controller to transition to.
-     - Parameter animated: true if the transition should be animated, false otherwise.
-     - Parameter completion: A block to be executed after the transition completes.
-     */
-    open func transitionToViewController(_ toViewController: UIViewController, animated: Bool, completion: (() -> Void)?) {
+    /// Transitions from the currently installed view controller to the specified view controller. If no view controller is installed, then this method simply loads the specified view controller.
+    ///
+    /// - Parameter toViewController: The view controller to transition to.
+    /// - Parameter animated: true if the transition should be animated, false otherwise.
+    /// - Parameter completion: A block to be executed after the transition completes.
+    open func transition(to toViewController: UIViewController, duration: TimeInterval, options: UIViewAnimationOptions, completion: (() -> Void)?) {
+        // prevent adding the view controller if it's already our child
         if toViewController.parent == self {
             return
         }
@@ -48,28 +51,39 @@ open class AppViewController: UIViewController {
         // otherwise if no previous view controller was loaded, we can just load the new one
         // immediately (i.e. first loading of a view controller)
         if let fromViewController = installedViewController {
-            fromViewController.willMove(toParentViewController: nil)
+            let transition = {
+                // notify the installed view controller that it is about to be removed
+                fromViewController.willMove(toParentViewController: nil)
+                
+                // update the current reference (needs to be updated for the `setNeedsStatusBarAppearanceUpdate()` call in the animation block)
+                self.installedViewController = toViewController
+                
+                // perform the transition
+                self.transition(from: fromViewController, to: toViewController, duration: duration, options: options, animations: {
+                    // updating the status bar appearance change within the animation block will animate the status bar color change, if there is one
+                    self.setNeedsStatusBarAppearanceUpdate()
+                    
+                }, completion: { (finished) in
+                    // "decontain" the previous child view controller
+                    fromViewController.view.removeFromSuperview()
+                    fromViewController.removeFromParentViewController()
+                    
+                    // finish "containing" the new view controller
+                    toViewController.didMove(toParentViewController: self)
+                    
+                    // completion handler
+                    completion?()
+                })
+            }
             
-            // update the current reference
-            installedViewController = toViewController
-            
-            // perform the transition
-            let duration = animated ? 0.6 : 0.0
-            transition(from: fromViewController, to: toViewController, duration: duration, options: .transitionCrossDissolve, animations: { [unowned self] in
-                // updating the status bar appearance change within the animation block will animate the status bar color change, if there is one
-                self.setNeedsStatusBarAppearanceUpdate()
-                
-            }, completion: { [unowned self] (finished) in
-                // "decontain" the previous child view controller
-                fromViewController.view.removeFromSuperview()
-                fromViewController.removeFromParentViewController()
-                
-                // finish "containing" the new view controller
-                toViewController.didMove(toParentViewController: self)
-                
-                // completion handler
-                completion?()
-            })
+            // dismiss anything presented first before transitioning
+            if let presented = presentedViewController, dismissesPresentedViewControllerBeforeTransition {
+                let animated = (duration > 0)
+                presented.dismiss(animated: animated, completion: transition)
+            }
+            else {
+                transition()
+            }
         }
         else {
             // set the current view controller
