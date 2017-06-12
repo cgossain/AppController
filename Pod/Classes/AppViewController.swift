@@ -34,7 +34,8 @@ open class AppViewController: UIViewController {
     /// Transitions from the currently installed view controller to the specified view controller. If no view controller is installed, then this method simply loads the specified view controller.
     ///
     /// - Parameter toViewController: The view controller to transition to.
-    /// - Parameter animated: true if the transition should be animated, false otherwise.
+    /// - Parameter duration: The duration of the transition animation.
+    /// - Parameter options: The transition animation options
     /// - Parameter completion: A block to be executed after the transition completes.
     open func transition(to toViewController: UIViewController, duration: TimeInterval, options: UIViewAnimationOptions, completion: (() -> Void)?) {
         // prevent adding the view controller if it's already our child

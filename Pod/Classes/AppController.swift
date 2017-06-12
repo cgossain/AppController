@@ -148,12 +148,12 @@ public class AppController {
             })
         
         
-        // load the desired initial interface
+        // load the desired initial interface without notifying the handlers
         if interfaceProvider.isInitiallyLoggedIn(for: self) {
-            transitionToLoggedInInterface()
+            transitionToLoggedInInterface(notify: false)
         }
         else {
-            transitionToLoggedOutInterface()
+            transitionToLoggedOutInterface(notify: false)
         }
     }
     
@@ -195,31 +195,43 @@ extension AppController {
 
 extension AppController {
     
-    fileprivate func transitionToLoggedInInterface() {
+    fileprivate func transitionToLoggedInInterface(notify: Bool = true) {
         let configuration = interfaceProvider.configuration(for: self)
         let target = interfaceProvider.loggedInInterfaceViewController(for: self)
-        willLoginHandler?(target)
+        
+        if notify {
+            willLoginHandler?(target)
+        }
+        
         rootViewController.dismissesPresentedViewControllerBeforeTransition = configuration.dismissesPresentedViewControllerBeforeTransition
         rootViewController.transition(to: target, duration: configuration.transitionDuration, options: configuration.options) { [weak self] in
             guard let strongSelf = self else {
                 return
             }
             
-            strongSelf.didLoginHandler?()
+            if notify {
+                strongSelf.didLoginHandler?()
+            }
         }
     }
     
-    fileprivate func transitionToLoggedOutInterface() {
+    fileprivate func transitionToLoggedOutInterface(notify: Bool = true) {
         let configuration = interfaceProvider.configuration(for: self)
         let target = interfaceProvider.loggedOutInterfaceViewController(for: self)
-        willLogoutHandler?(target)
+        
+        if notify {
+            willLogoutHandler?(target)
+        }
+        
         rootViewController.dismissesPresentedViewControllerBeforeTransition = configuration.dismissesPresentedViewControllerBeforeTransition
         rootViewController.transition(to: target, duration: configuration.transitionDuration, options: configuration.options) { [weak self] in
             guard let strongSelf = self else {
                 return
             }
             
-            strongSelf.didLogoutHandler?()
+            if notify {
+                strongSelf.didLogoutHandler?()
+            }
         }
     }
     
