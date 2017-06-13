@@ -28,17 +28,19 @@ class StoryboardInterfaceProvider: AppControllerInterfaceProviding {
     let storyboard: UIStoryboard
     let loggedOutInterfaceID: String
     let loggedInInterfaceID: String
+    let configuration: AppController.Configuration
     
-    init(storyboard: UIStoryboard, loggedOutInterfaceID: String, loggedInInterfaceID: String) {
+    init(storyboard: UIStoryboard, loggedOutInterfaceID: String, loggedInInterfaceID: String, configuration: AppController.Configuration) {
         self.storyboard = storyboard
         self.loggedOutInterfaceID = loggedOutInterfaceID
         self.loggedInInterfaceID = loggedInInterfaceID
+        self.configuration = configuration
     }
     
     // MARK: - AppControllerInterfaceProviding
     
     func configuration(for appController: AppController) -> AppController.Configuration {
-        return AppController.Configuration()
+        return configuration
     }
     
     func loggedOutInterfaceViewController(for appController: AppController) -> UIViewController {

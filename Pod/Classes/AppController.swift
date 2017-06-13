@@ -102,9 +102,10 @@ public class AppController {
     /// - Note: The controller automatically installs the _initial view controller_ from the storyboard as the root view controller. Therfore, the _initial view controller_ in
     ///         the specified storyboard MUST be an instance of `AppViewController`, otherwise a crash will occur.
     ///
-    public convenience init(storyboardName: String, loggedOutInterfaceID: String, loggedInInterfaceID: String) {
+    public convenience init(storyboardName: String, loggedOutInterfaceID: String, loggedInInterfaceID: String, configuration: AppController.Configuration = Configuration()) {
         let storyboard = UIStoryboard(name: storyboardName, bundle: nil)
-        self.init(interfaceProvider: StoryboardInterfaceProvider(storyboard: storyboard, loggedOutInterfaceID: loggedOutInterfaceID, loggedInInterfaceID: loggedInInterfaceID))
+        let provider = StoryboardInterfaceProvider(storyboard: storyboard, loggedOutInterfaceID: loggedOutInterfaceID, loggedInInterfaceID: loggedInInterfaceID, configuration: configuration)
+        self.init(interfaceProvider: provider)
     }
     
     /// Initializes the controller with closures that return the view controllers to install for the _logged out_ and _logged in_ states.
