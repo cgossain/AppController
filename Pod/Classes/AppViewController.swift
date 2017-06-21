@@ -36,23 +36,27 @@ open class AppViewController: UIViewController {
     /// - Parameter toViewController: The view controller to transition to.
     /// - Parameter duration: The duration of the transition animation.
     /// - Parameter options: The transition animation options
+    /// - Parameter willBeginTransition: A block that is called just before the transition actually begins (i.e. after internally dismissing a presented view controller, but before the transition)
     /// - Parameter completion: A block to be executed after the transition completes.
-    open func transition(to toViewController: UIViewController, duration: TimeInterval, options: UIViewAnimationOptions, completion: (() -> Void)?) {
+    open func transition(to toViewController: UIViewController, duration: TimeInterval, options: UIViewAnimationOptions, willBeginTransition: (() -> Void)? = nil, completion: (() -> Void)?) {
         // prevent adding the view controller if it's already our child
         if toViewController.parent == self {
             return
         }
         
-        // add the new controller as a child
-        addChildViewController(toViewController)
-        toViewController.view.frame = view.bounds
-        view.addSubview(toViewController.view)
-        
-        // if there is a view controller currently installed, transition from it to the new one
-        // otherwise if no previous view controller was loaded, we can just load the new one
-        // immediately (i.e. first loading of a view controller)
-        if let fromViewController = installedViewController {
-            let transition = {
+        // this closure defines the entire containment and transtion process
+        let transition = {
+            willBeginTransition?()
+            
+            // add the new controller as a child
+            self.addChildViewController(toViewController)
+            toViewController.view.frame = self.view.bounds
+            self.view.addSubview(toViewController.view)
+            
+            // if there is a view controller currently installed, transition from it to the new one
+            // otherwise if no previous view controller was loaded, we can just load the new one
+            // immediately (i.e. first loading of a view controller)
+            if let fromViewController = self.installedViewController {
                 // notify the installed view controller that it is about to be removed
                 fromViewController.willMove(toParentViewController: nil)
                 
@@ -76,28 +80,30 @@ open class AppViewController: UIViewController {
                     completion?()
                 })
             }
-            
-            // dismiss anything presented first before transitioning
-            if let presented = presentedViewController, dismissesPresentedViewControllerBeforeTransition {
-                let animated = (duration > 0)
-                presented.dismiss(animated: animated, completion: transition)
-            }
             else {
+                // set the current view controller
+                self.installedViewController = toViewController
+                
+                // update status bar appearance
+                self.setNeedsStatusBarAppearanceUpdate()
+                
+                // simply finish containing the view controller
+                toViewController.didMove(toParentViewController: self)
+                
+                // completion handler
+                completion?()
+            }
+        }
+        
+        // dismiss anything presented first before transitioning
+        if let presented = presentedViewController, dismissesPresentedViewControllerBeforeTransition {
+            let animated = (duration > 0)
+            presented.dismiss(animated: animated) {
                 transition()
             }
         }
         else {
-            // set the current view controller
-            installedViewController = toViewController
-            
-            // update status bar appearance
-            setNeedsStatusBarAppearanceUpdate()
-            
-            // simply finish containing the view controller
-            toViewController.didMove(toParentViewController: self)
-            
-            // completion handler
-            completion?()
+            transition()
         }
     }
     

@@ -62,6 +62,8 @@ public class AppController {
     
     /// A closure that is called just before the transition to the _logged in_ interface begins. The view
     /// controller that is about to be presented is passed to the block as the targetViewController.
+    /// - Note: This handler is called just before the transition begins, this means that if configured accordingly
+    ///         a presented view controller would first be dismissed before this handler is called.
     public var willLoginHandler: ((_ targetViewController: UIViewController) -> Void)?
     
     /// A closure that is called after the transition to the _logged in_ interface completes.
@@ -69,6 +71,8 @@ public class AppController {
     
     /// A closure that is called just before the transition to the _logged out_ interface begins. The view
     /// controller that is about to be presented is passed to the block as the targetViewController.
+    /// - Note: This handler is called just before the transition begins, this means that if configured accordingly
+    ///         a presented view controller would first be dismissed before this handler is called.
     public var willLogoutHandler: ((_ targetViewController: UIViewController) -> Void)?
     
     /// A closure that is called after the transition to the _logged out_ interface completes.
@@ -199,13 +203,19 @@ extension AppController {
     fileprivate func transitionToLoggedInInterface(notify: Bool = true) {
         let configuration = interfaceProvider.configuration(for: self)
         let target = interfaceProvider.loggedInInterfaceViewController(for: self)
-        
-        if notify {
-            willLoginHandler?(target)
-        }
+        let duration = configuration.transitionDuration
+        let options = configuration.options
         
         rootViewController.dismissesPresentedViewControllerBeforeTransition = configuration.dismissesPresentedViewControllerBeforeTransition
-        rootViewController.transition(to: target, duration: configuration.transitionDuration, options: configuration.options) { [weak self] in
+        rootViewController.transition(to: target, duration: duration, options: options, willBeginTransition: { [weak self] in
+            guard let strongSelf = self else {
+                return
+            }
+            
+            if notify {
+                strongSelf.willLoginHandler?(target)
+            }
+        }, completion: { [weak self] in
             guard let strongSelf = self else {
                 return
             }
@@ -213,19 +223,25 @@ extension AppController {
             if notify {
                 strongSelf.didLoginHandler?()
             }
-        }
+        })
     }
     
     fileprivate func transitionToLoggedOutInterface(notify: Bool = true) {
         let configuration = interfaceProvider.configuration(for: self)
         let target = interfaceProvider.loggedOutInterfaceViewController(for: self)
-        
-        if notify {
-            willLogoutHandler?(target)
-        }
+        let duration = configuration.transitionDuration
+        let options = configuration.options
         
         rootViewController.dismissesPresentedViewControllerBeforeTransition = configuration.dismissesPresentedViewControllerBeforeTransition
-        rootViewController.transition(to: target, duration: configuration.transitionDuration, options: configuration.options) { [weak self] in
+        rootViewController.transition(to: target, duration: duration, options: options, willBeginTransition: { [weak self] in
+            guard let strongSelf = self else {
+                return
+            }
+            
+            if notify {
+                strongSelf.willLogoutHandler?(target)
+            }
+        }, completion: { [weak self] in
             guard let strongSelf = self else {
                 return
             }
@@ -233,7 +249,7 @@ extension AppController {
             if notify {
                 strongSelf.didLogoutHandler?()
             }
-        }
+        })
     }
     
 }
