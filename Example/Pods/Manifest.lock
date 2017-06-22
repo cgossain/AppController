@@ -1,5 +1,5 @@
 PODS:
-  - AppController (0.5.2)
+  - AppController (0.5.3)
 
 DEPENDENCIES:
   - AppController (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
-  AppController: 33f95d67a74ca8ee66a7b85cacf17fdd73ce8da9
+  AppController: 3ca1a45c1b37a0db45b9653a05ed223cfabc7a5f
 
 PODFILE CHECKSUM: 6c2d6716a2258076478479348a646d609bcae348
 
