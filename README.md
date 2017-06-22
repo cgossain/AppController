@@ -34,6 +34,12 @@ Create an interface provider:
 ```
 class MyAwesomeInterfaceProvider: AppControllerInterfaceProviding {
 
+    func configuration(for appController: AppController, traitCollection: UITraitCollection) -> AppController.Configuration {
+      // return a configuration model for the transition
+      // note that the default configuration is being returned here, but it can be further configured
+      return AppController.Configuration()
+    }
+
     func loggedOutInterfaceViewController(for appController: AppController) -> UIViewController {
         // create and return your logged out interface view controller
         let welcomeViewController = WelcomeViewController()
@@ -68,34 +74,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     lazy var appController: AppController = {
         let controller = AppController(interfaceProvider: self.myAwesomeInterfaceProvider)
-        
+
         // do stuff just before login transition...
         controller.willLoginHandler = { [unowned self] (targetViewController) in
-        
+
         }
-        
+
         // do stuff right after login transition...
         controller.didLoginHandler = { [unowned self] in
-        
+
         }
-        
+
         // do stuff just before logout transition...
         controller.willLogoutHandler = { [unowned self] (targetViewController) in
-        
+
         }
-        
+
         // do stuff right after logout transition...
         controller.didLogoutHandler = { [unowned self] in
-        
+
         }
-        
+
         return controller
     }()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // install the app controller's root view controller as the root view controller of the window
-        window?.rootViewController = appController.rootViewController
-        window?.makeKeyAndVisible()
+        let myWindow = UIWindow()
+        window = myWindow
+
+        // install the app controllers' root view controller as the root view controller of the window
+        appController.installRootViewController(in: myWindow)
 
         return true
     }
@@ -130,9 +138,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // install the app controller's root view controller as the root view controller of the window
-        window?.rootViewController = appController.rootViewController
-        window?.makeKeyAndVisible()
+        // install the app controllers' root view controller as the root view controller of the window
+        appController.installRootViewController(in: window!)
 
         return true
     }
