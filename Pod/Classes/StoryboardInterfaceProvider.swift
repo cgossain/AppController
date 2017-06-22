@@ -39,7 +39,7 @@ class StoryboardInterfaceProvider: AppControllerInterfaceProviding {
     
     // MARK: - AppControllerInterfaceProviding
     
-    func configuration(for appController: AppController) -> AppController.Configuration {
+    func configuration(for appController: AppController, traitCollection: UITraitCollection) -> AppController.Configuration {
         return configuration
     }
     

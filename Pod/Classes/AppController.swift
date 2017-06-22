@@ -24,16 +24,33 @@
 import UIKit
 
 public protocol AppControllerInterfaceProviding {
-    /// Return a configuration object.
-    func configuration(for appController: AppController) -> AppController.Configuration
+    /// Return a configuration object describing the transition parameters.
+    ///
+    /// - Parameter appController: The app controller instance requesting the configuration.
+    /// - Parameter traitCollection: The current trait collection of the root view controller.
+    /// - Returns: A configuration model describing the transition parameters.
+    ///
+    func configuration(for appController: AppController, traitCollection: UITraitCollection) -> AppController.Configuration
     
     /// Return the view controller to be installed as the "logged out" interface.
+    ///
+    /// - Parameter appController: The app controller instance requesting the view controller.
+    /// - Returns: A view controller to install as the logged out interface.
+    ///
     func loggedOutInterfaceViewController(for appController: AppController) -> UIViewController
     
     /// Return the view controller to be installed as the "logged in" interface.
+    ///
+    /// - Parameter appController: The app controller instance requesting the view controller.
+    /// - Returns: A view controller to install as the logged in interface.
+    ///
     func loggedInInterfaceViewController(for appController: AppController) -> UIViewController
     
     /// Return true if the "logged in" interface should be initially loaded, or false if the "logged out" interface is initially loaded.
+    ///
+    /// - Parameter appController: The app controller instance requesting the configuration.
+    /// - Returns: `true` if the logged in interface should be initially presented, `false` otherwise.
+    ///
     func isInitiallyLoggedIn(for appController: AppController) -> Bool
 }
 
@@ -46,9 +63,9 @@ public class AppController {
         /// The transiton animation options.
         public let options: UIViewAnimationOptions
         
-        /// If `true`, a call to dismiss(animated:completion:) is made before performing the transition. Defaults to `true`.
+        /// If `true`, and if there is a presented view controller, it is dismissed along with the interface transition. Defaults to `true`.
         /// - Note: You generally would want this to be `true`, but you have the option to disable it if needed.
-        public var dismissesPresentedViewControllerBeforeTransition = true
+        public var dismissesPresentedViewControllerOnTransition = true
         
         /// Initializes the configuration with the given options.
         public init(transitionDuration: TimeInterval = 0.6, options: UIViewAnimationOptions = .transitionCrossDissolve) {
@@ -151,15 +168,6 @@ public class AppController {
                     
                     strongSelf.transitionToLoggedOutInterface()
             })
-        
-        
-        // load the desired initial interface without notifying the handlers
-        if interfaceProvider.isInitiallyLoggedIn(for: self) {
-            transitionToLoggedInInterface(notify: false)
-        }
-        else {
-            transitionToLoggedOutInterface(notify: false)
-        }
     }
     
     deinit {
@@ -183,6 +191,21 @@ extension AppController {
     /// Internal notification that is posted on `AppController.logout()`.
     fileprivate static let shouldLogoutNotification = Notification.Name(rawValue: "AppControllerShouldLogoutNotification")
     
+    /// Installs the internal instance of `AppViewController` as the windows' `rootViewController`, calls `makeKeyAndVisible()` on the window, and transtitions to the initial interface.
+    public func installRootViewController(in window: UIWindow) {
+        // setting the root view controller before transitioning allows the target interface to have access to a fully defined trait collection if needed
+        window.rootViewController = rootViewController
+        window.makeKeyAndVisible()
+        
+        // transtion to the initial interface; since handlers should already be aware of their desired initial interface, they shouldn't be notified here
+        if interfaceProvider.isInitiallyLoggedIn(for: self) {
+            transitionToLoggedInInterface(notify: false)
+        }
+        else {
+            transitionToLoggedOutInterface(notify: false)
+        }
+    }
+    
     /// Posts a notification that notifies any active AppController instance to switch to its _logged in_ interface.
     /// Note that any given app should only have a single active AppController instance. Therefore that single instance
     /// will be the one that receives and handles the notification.
@@ -198,15 +221,15 @@ extension AppController {
     }
 }
 
-extension AppController {
+fileprivate extension AppController {
     
-    fileprivate func transitionToLoggedInInterface(notify: Bool = true) {
-        let configuration = interfaceProvider.configuration(for: self)
+    func transitionToLoggedInInterface(notify: Bool = true) {
+        let configuration = interfaceProvider.configuration(for: self, traitCollection: rootViewController.traitCollection)
         let target = interfaceProvider.loggedInInterfaceViewController(for: self)
         let duration = configuration.transitionDuration
         let options = configuration.options
         
-        rootViewController.dismissesPresentedViewControllerBeforeTransition = configuration.dismissesPresentedViewControllerBeforeTransition
+        rootViewController.dismissesPresentedViewControllerOnTransition = configuration.dismissesPresentedViewControllerOnTransition
         rootViewController.transition(to: target, duration: duration, options: options, willBeginTransition: { [weak self] in
             guard let strongSelf = self else {
                 return
@@ -226,13 +249,13 @@ extension AppController {
         })
     }
     
-    fileprivate func transitionToLoggedOutInterface(notify: Bool = true) {
-        let configuration = interfaceProvider.configuration(for: self)
+    func transitionToLoggedOutInterface(notify: Bool = true) {
+        let configuration = interfaceProvider.configuration(for: self, traitCollection: rootViewController.traitCollection)
         let target = interfaceProvider.loggedOutInterfaceViewController(for: self)
         let duration = configuration.transitionDuration
         let options = configuration.options
         
-        rootViewController.dismissesPresentedViewControllerBeforeTransition = configuration.dismissesPresentedViewControllerBeforeTransition
+        rootViewController.dismissesPresentedViewControllerOnTransition = configuration.dismissesPresentedViewControllerOnTransition
         rootViewController.transition(to: target, duration: duration, options: options, willBeginTransition: { [weak self] in
             guard let strongSelf = self else {
                 return
