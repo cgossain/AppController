@@ -25,8 +25,11 @@ import UIKit
 
 open class AppViewController: UIViewController {
     
-    /// If `true`, the presented view controller is faded out with the view controller transition and then dismissed on completion. Defaults to `true`.
-    var dismissesPresentedViewControllerOnTransition = true
+    /// If `true`, any presented view controller is dismissed during a transition to a new view controller. Defaults to `false`.
+    /// - Note: This property defaults to `false` to allow the `AppViewController` to be used as a standalone container view
+    ///         controller whitout any special meddling/magic. The `AppController` will set this internally according to its 
+    ///         provided Configuration model. The configuration model defaults to `true` for this property.
+    var dismissesPresentedViewControllerOnTransition = false
     
     /// Returns the view controller that is currently installed.
     open private(set) var installedViewController: UIViewController?
