@@ -73,15 +73,15 @@ open class AppViewController: UIViewController {
                 // updating the status bar appearance change within the animation block will animate the status bar color change, if there is one
                 self.setNeedsStatusBarAppearanceUpdate()
                 
-                // fade out the presented view controller if needed
-                if let presentedViewController = self.presentedViewController, self.dismissesPresentedViewControllerOnTransition {
-                    presentedViewController.view.alpha = 0.0
+                // fade out the view of the any presented view controller
+                if self.dismissesPresentedViewControllerOnTransition {
+                    self.presentedViewController?.view.alpha = 0.0
                 }
                 
             }, completion: { (finished) in
-                // dismiss the presented view controller
-                if let presentedViewController = self.presentedViewController, self.dismissesPresentedViewControllerOnTransition {
-                    presentedViewController.dismiss(animated: false, completion: nil)
+                // dismiss any presented view controller
+                if self.dismissesPresentedViewControllerOnTransition {
+                    self.dismiss(animated: false, completion: nil)
                 }
                 
                 // "decontain" the previous child view controller
