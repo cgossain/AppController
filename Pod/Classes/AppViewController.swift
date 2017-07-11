@@ -26,11 +26,11 @@ import UIKit
 open class AppViewController: UIViewController {
     
     open override var shouldAutorotate: Bool {
-        return installedViewController?.shouldAutorotate ?? true
+        return installedViewController?.shouldAutorotate ?? super.shouldAutorotate
     }
     
     open override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return installedViewController?.supportedInterfaceOrientations ?? .all
+        return installedViewController?.supportedInterfaceOrientations ?? super.supportedInterfaceOrientations
     }
     
     /// If `true`, any presented view controller is dismissed during a transition to a new view controller. Defaults to `false`.
