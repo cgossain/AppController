@@ -20,5 +20,12 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    override var shouldAutorotate: Bool {
+        return self.traitCollection.userInterfaceIdiom == .pad
+    }
+    
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return .allButUpsideDown
+    }
 }
 
