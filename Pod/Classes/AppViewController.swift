@@ -25,6 +25,18 @@ import UIKit
 
 open class AppViewController: UIViewController {
     
+    open override var shouldAutorotate: Bool {
+        return installedViewController?.shouldAutorotate ?? super.shouldAutorotate
+    }
+    
+    open override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return installedViewController?.supportedInterfaceOrientations ?? super.supportedInterfaceOrientations
+    }
+    
+    open override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
+        return installedViewController?.preferredInterfaceOrientationForPresentation ?? super.preferredInterfaceOrientationForPresentation
+    }
+    
     /// If `true`, any presented view controller is dismissed during a transition to a new view controller. Defaults to `false`.
     /// - Note: This property defaults to `false` to allow the `AppViewController` to be used as a standalone container view
     ///         controller whitout any special meddling/magic. The `AppController` will set this internally according to its 
