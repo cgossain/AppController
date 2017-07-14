@@ -80,19 +80,24 @@ open class AppViewController: UIViewController {
             // update the current reference (needs to be updated for the `setNeedsStatusBarAppearanceUpdate()` call in the animation block)
             installedViewController = toViewController
             
+            // dismiss the presented view controller immediately if there is no animation
+            if dismissesPresentedViewControllerOnTransition && duration == 0.0 {
+                dismiss(animated: false, completion: nil)
+            }
+            
             // perform the transition
             transition(from: fromViewController, to: toViewController, duration: duration, options: options, animations: {
                 // updating the status bar appearance change within the animation block will animate the status bar color change, if there is one
                 self.setNeedsStatusBarAppearanceUpdate()
                 
-                // fade out the view of the any presented view controller
-                if self.dismissesPresentedViewControllerOnTransition {
+                // fade out the view of the any presented view controller (only if we have a non-zero animation duration)
+                if self.dismissesPresentedViewControllerOnTransition && duration != 0.0 {
                     self.presentedViewController?.view.alpha = 0.0
                 }
                 
             }, completion: { (finished) in
                 // dismiss any presented view controller
-                if self.dismissesPresentedViewControllerOnTransition {
+                if self.dismissesPresentedViewControllerOnTransition && duration != 0.0 {
                     self.dismiss(animated: false, completion: nil)
                 }
                 
