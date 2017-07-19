@@ -57,20 +57,30 @@ public protocol AppControllerInterfaceProviding {
 public class AppController {
     
     public struct Configuration {
+        public enum DismissStyle {
+            case beforeTransition   // dismisses just before the transtion begins
+            case duringTransition   // dismisses while the transition is occuring
+        }
+        
         /// The animation duration when transitionning between logged in/out states. A duration of zero indicates no animation should occur.
-        public let transitionDuration: TimeInterval
+        public var transitionDuration: TimeInterval
         
         /// The transiton animation options.
-        public let options: UIViewAnimationOptions
+        public var options: UIViewAnimationOptions
         
         /// If `true`, and if there is a presented view controller, it is dismissed along with the interface transition. Defaults to `true`.
         /// - Note: You generally would want this to be `true`, but you have the option to disable it if needed.
         public var dismissesPresentedViewControllerOnTransition = true
         
+        ///  Indicates to the controller when to dismiss a presented view controller.
+        public var presentedViewControllerDismissType: DismissStyle = .beforeTransition
+        
         /// Initializes the configuration with the given options.
-        public init(transitionDuration: TimeInterval = 0.6, options: UIViewAnimationOptions = .transitionCrossDissolve) {
+        public init(transitionDuration: TimeInterval = 0.6, options: UIViewAnimationOptions = .transitionCrossDissolve, dismissesPresentedViewControllerOnTransition: Bool = true, presentedViewControllerDismissType: DismissStyle = .beforeTransition) {
             self.transitionDuration = transitionDuration
             self.options = options
+            self.dismissesPresentedViewControllerOnTransition = dismissesPresentedViewControllerOnTransition
+            self.presentedViewControllerDismissType = presentedViewControllerDismissType
         }
     }
     
@@ -230,6 +240,7 @@ fileprivate extension AppController {
         let options = configuration.options
         
         rootViewController.dismissesPresentedViewControllerOnTransition = configuration.dismissesPresentedViewControllerOnTransition
+        rootViewController.presentedViewControllerDismissType = configuration.presentedViewControllerDismissType
         rootViewController.transition(to: target, duration: duration, options: options, willBeginTransition: { [weak self] in
             guard let strongSelf = self else {
                 return
@@ -256,6 +267,7 @@ fileprivate extension AppController {
         let options = configuration.options
         
         rootViewController.dismissesPresentedViewControllerOnTransition = configuration.dismissesPresentedViewControllerOnTransition
+        rootViewController.presentedViewControllerDismissType = configuration.presentedViewControllerDismissType
         rootViewController.transition(to: target, duration: duration, options: options, willBeginTransition: { [weak self] in
             guard let strongSelf = self else {
                 return

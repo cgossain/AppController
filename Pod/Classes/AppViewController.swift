@@ -43,6 +43,9 @@ open class AppViewController: UIViewController {
     ///         provided Configuration model. The configuration model defaults to `true` for this property.
     var dismissesPresentedViewControllerOnTransition = false
     
+    ///  Indicates to the controller when to dismiss a presented view controller.
+    var presentedViewControllerDismissType: AppController.Configuration.DismissStyle = .beforeTransition
+    
     /// Returns the view controller that is currently installed.
     open private(set) var installedViewController: UIViewController?
     
@@ -81,8 +84,9 @@ open class AppViewController: UIViewController {
             installedViewController = toViewController
             
             // dismiss the presented view controller immediately if there is no animation
-            if dismissesPresentedViewControllerOnTransition && duration == 0.0 {
-                dismiss(animated: false, completion: nil)
+            if dismissesPresentedViewControllerOnTransition && presentedViewControllerDismissType == .beforeTransition {
+                let animated = duration > 0
+                dismiss(animated: animated, completion: nil)
             }
             
             // perform the transition
@@ -91,13 +95,13 @@ open class AppViewController: UIViewController {
                 self.setNeedsStatusBarAppearanceUpdate()
                 
                 // fade out the view of the any presented view controller (only if we have a non-zero animation duration)
-                if self.dismissesPresentedViewControllerOnTransition && duration != 0.0 {
+                if self.dismissesPresentedViewControllerOnTransition && self.presentedViewControllerDismissType == .duringTransition {
                     self.presentedViewController?.view.alpha = 0.0
                 }
                 
             }, completion: { (finished) in
                 // dismiss any presented view controller
-                if self.dismissesPresentedViewControllerOnTransition && duration != 0.0 {
+                if self.dismissesPresentedViewControllerOnTransition && self.presentedViewControllerDismissType == .duringTransition {
                     self.dismiss(animated: false, completion: nil)
                 }
                 
