@@ -73,6 +73,11 @@ open class AppViewController: UIViewController {
         toViewController.view.frame = view.bounds
         view.addSubview(toViewController.view)
         
+        toViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        toViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        toViewController.view.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        toViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
         // if there is a view controller currently installed, transition from it to the new one
         // otherwise if no previous view controller was loaded, we can just load the new one
         // immediately (i.e. first loading of a view controller)
@@ -137,15 +142,5 @@ open class AppViewController: UIViewController {
     
     open override var childViewControllerForStatusBarHidden : UIViewController? {
         return installedViewController
-    }
-    
-    open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        
-        // resize and animate the installed view controllers' view
-        coordinator.animate(alongsideTransition: { (context) in
-            let newFrame = CGRect(x: 0, y: 0, width: size.width, height: size.height)
-            self.installedViewController?.view.frame = newFrame
-        }, completion: nil)
     }
 }
