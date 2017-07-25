@@ -73,6 +73,7 @@ open class AppViewController: UIViewController {
         toViewController.view.frame = view.bounds
         view.addSubview(toViewController.view)
         
+        toViewController.view.translatesAutoresizingMaskIntoConstraints = false
         toViewController.view.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         toViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         toViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
