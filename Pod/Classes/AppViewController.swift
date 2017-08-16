@@ -107,7 +107,7 @@ fileprivate extension AppViewController {
         window.resignCurrentFirstResponderIfNeeded {
             
             // take a snapshot of the window state
-            let snapshot = window.snapshotView(afterScreenUpdates: true)
+            let snapshot = window.snapshotView(afterScreenUpdates: false)
             snapshot?.tag = transitionSnapshotTag
             
             // cover the window with the snapshot
