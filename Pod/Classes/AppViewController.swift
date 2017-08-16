@@ -86,10 +86,10 @@ extension AppViewController {
             }
             
             if configuration.dismissesPresentedViewControllerOnTransition {
-                transitionBySnapshotting(from: fromViewController, to: toViewController, in: keyWindow, duration: configuration.transitionDuration, completionHandler: completionHandler)
+                transitionBySnapshotting(from: fromViewController, to: toViewController, in: keyWindow, duration: configuration.transitionDuration, delay: configuration.transitionDelay, completionHandler: completionHandler)
             }
             else {
-                transitionWithoutDismissingPresentedViewController(from: fromViewController, to: toViewController, in: keyWindow, duration: configuration.transitionDuration, completionHandler: completionHandler)
+                transitionWithoutDismissingPresentedViewController(from: fromViewController, to: toViewController, in: keyWindow, duration: configuration.transitionDuration, delay: configuration.transitionDelay, completionHandler: completionHandler)
             }
         }
         else {
@@ -102,7 +102,7 @@ fileprivate extension AppViewController {
     
     /// Technique #1: Transition is performed by resigning first responder, then snapshotting the entire window. The snapshot is placed on top of all other window subviews while
     /// the underlying hierarchy is changed. Finally the snapshot is faded out, and removed to reveal the updated view hierarchy.
-    func transitionBySnapshotting(from fromViewController: UIViewController, to toViewController: UIViewController, in window: UIWindow, duration: TimeInterval, completionHandler: (() -> Void)?) {
+    func transitionBySnapshotting(from fromViewController: UIViewController, to toViewController: UIViewController, in window: UIWindow, duration: TimeInterval, delay: TimeInterval, completionHandler: (() -> Void)?) {
         // resign any active first responder before continuing
         window.resignCurrentFirstResponderIfNeeded {
             
@@ -147,7 +147,7 @@ fileprivate extension AppViewController {
             toViewController.didMove(toParentViewController: self)
             
             // fade out the snapshot to reveal the `toView`; note that the small animation delay allows dismissed presented views to be removed and the hieararchy ready to go before fading out the screenshot view
-            UIView.animate(withDuration: duration, delay: 0.05, options: .transitionCrossDissolve, animations: {
+            UIView.animate(withDuration: duration, delay: delay, options: .transitionCrossDissolve, animations: {
                 // fade out the snapshot to reveal the update hierarchy
                 snapshot?.alpha = 0.0
                 
@@ -166,7 +166,7 @@ fileprivate extension AppViewController {
     }
     
     /// Technique #2: Transition keeps the topmost UITransitionView visible, but hides all other ones (i.e. when there are multiple presentations overlayed). The topmost UITransitionView is faded out as the `toView` is faded in.
-    func transitionByDismissing(from fromViewController: UIViewController, to toViewController: UIViewController, in window: UIWindow, duration: TimeInterval, completionHandler: (() -> Void)?) {
+    func transitionByDismissing(from fromViewController: UIViewController, to toViewController: UIViewController, in window: UIWindow, duration: TimeInterval, delay: TimeInterval, completionHandler: (() -> Void)?) {
         // resign any active first responder before continuing
         window.resignCurrentFirstResponderIfNeeded {
             
@@ -199,7 +199,7 @@ fileprivate extension AppViewController {
             self.installedViewController = toViewController
             
             // fade out the snapshot to reveal the `toView`; note that the small animation delay allows dismissed presented views to be removed and the hieararchy ready to go before fading out the screenshot view
-            UIView.animate(withDuration: duration, delay: 0.0, options: .curveEaseIn, animations: {
+            UIView.animate(withDuration: duration, delay: delay, options: .curveEaseIn, animations: {
                 // fade out the topmost presented view
                 topmostPresentedView?.alpha = 0.0
                 
@@ -257,7 +257,7 @@ fileprivate extension AppViewController {
     }
     
     /// Transitions between the specified view controllers without dismissing presented view controllers.
-    func transitionWithoutDismissingPresentedViewController(from fromViewController: UIViewController, to toViewController: UIViewController, in window: UIWindow, duration: TimeInterval, completionHandler: (() -> Void)?) {
+    func transitionWithoutDismissingPresentedViewController(from fromViewController: UIViewController, to toViewController: UIViewController, in window: UIWindow, duration: TimeInterval, delay: TimeInterval, completionHandler: (() -> Void)?) {
         // notify the `fromViewController` is about to be removed
         fromViewController.willMove(toParentViewController: nil)
         
@@ -277,7 +277,7 @@ fileprivate extension AppViewController {
         self.installedViewController = toViewController
         
         // fade out the snapshot to reveal the `toView`; note that the small animation delay allows dismissed presented views to be removed and the hieararchy ready to go before fading out the screenshot view
-        UIView.animate(withDuration: duration, delay: 0.0, options: .curveEaseIn, animations: {
+        UIView.animate(withDuration: duration, delay: delay, options: .curveEaseIn, animations: {
             // fade in the `toView`
             toViewController.view.alpha = 1.0
             

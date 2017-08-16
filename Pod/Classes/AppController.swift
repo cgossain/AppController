@@ -61,6 +61,9 @@ public class AppController {
         /// The animation duration when transitionning between logged in/out states. A duration of zero indicates no animation should occur.
         public var transitionDuration: TimeInterval = 0.6
         
+        /// The animation delay when transitioning between logged in/out states. This is provided as an additional transition configuration point. Generally the default of 0.0 works well, however they may be times when a delay is needed.
+        public var transitionDelay: TimeInterval = 0.0
+        
         /// If `true`, and if there is a presented view controller, it is dismissed along with the interface transition. Defaults to `true`.
         /// - Note: You generally would want this to be `true`, but you have the option to disable it if needed.
         public var dismissesPresentedViewControllerOnTransition = true
