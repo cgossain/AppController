@@ -139,8 +139,15 @@ fileprivate extension AppViewController {
             // update the current reference (needs to be updated for the `setNeedsStatusBarAppearanceUpdate()` call in the animation block)
             self.installedViewController = toViewController
             
+            // decontain the `fromViewController`
+            fromViewController.view.removeFromSuperview()
+            fromViewController.removeFromParentViewController()
+            
+            // finish containing the `toViewController`
+            toViewController.didMove(toParentViewController: self)
+            
             // fade out the snapshot to reveal the `toView`; note that the small animation delay allows dismissed presented views to be removed and the hieararchy ready to go before fading out the screenshot view
-            UIView.animate(withDuration: duration, delay: 0.0, options: .transitionCrossDissolve, animations: {
+            UIView.animate(withDuration: duration, delay: 0.05, options: .transitionCrossDissolve, animations: {
                 // fade out the snapshot to reveal the update hierarchy
                 snapshot?.alpha = 0.0
                 
@@ -150,13 +157,6 @@ fileprivate extension AppViewController {
             }, completion: { (finished) in
                 // remove the snapshot
                 snapshot?.removeFromSuperview()
-                
-                // decontain the `fromViewController`
-                fromViewController.view.removeFromSuperview()
-                fromViewController.removeFromParentViewController()
-                
-                // finish containing the `toViewController`
-                toViewController.didMove(toParentViewController: self)
                 
                 // completion handler
                 completionHandler?()
