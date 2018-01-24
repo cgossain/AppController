@@ -52,6 +52,15 @@ public protocol AppControllerInterfaceProviding {
     /// - Returns: `true` if the logged in interface should be initially presented, `false` otherwise.
     ///
     func isInitiallyLoggedIn(for appController: AppController) -> Bool
+    
+    /// Override to assign a customized trait collection for the installed view controller. Called during size transitions if the installed view controller is set.
+    ///
+    /// - Parameter size: The size that the app is transitioning to.
+    /// - Parameter viewController: The installed view controller of the app view controller.
+    /// - Returns: A customized traitcollection or `nil` for default system behaviour.
+    ///
+    func overrideTraitCollection(forSize size:CGSize, viewController: UIViewController) -> UITraitCollection?
+
 }
 
 public class AppController {
@@ -101,11 +110,15 @@ public class AppController {
     public lazy var rootViewController: AppViewController = {
         if let storyboard = self.storyboard {
             // get the rootViewController from the storyboard
-            return storyboard.instantiateInitialViewController() as! AppViewController
+            let appViewController = storyboard.instantiateInitialViewController() as! AppViewController
+            appViewController.sizeTransitionProvider = self
+            return appViewController
         }
         
         // if there is no storyboard, just create an instance of the app view controller (using the custom class if provided)
-        return self.appViewControllerClass.init()
+        let appViewController = self.appViewControllerClass.init()
+        appViewController.sizeTransitionProvider = self
+        return appViewController
     }()
     
     /// Returns the storyboard instance being used if the controller was initialized using the convenience storyboad initializer, otherwise retuns `nil`.
@@ -270,5 +283,25 @@ fileprivate extension AppController {
             }
         })
     }
+}
+
+extension AppController: AppViewControllerSizeTransitionProviding {
+    public func appViewControllerWillTransition(toTraitCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
+        guard let installedViewController = rootViewController.installedViewController else { return }
+        let size = rootViewController.view.frame.size
+        coordinator.animate(alongsideTransition: { [unowned self] (context) in
+            let overrideTraitCollection = self.interfaceProvider.overrideTraitCollection(forSize: size, viewController: installedViewController)
+            self.rootViewController.setOverrideTraitCollection(overrideTraitCollection, forChildViewController: installedViewController)
+            }, completion: nil)
+    }
+
+    public func appViewControllerWillTransition(toSize size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        guard let installedViewController = rootViewController.installedViewController else { return }
+        coordinator.animate(alongsideTransition: { [unowned self] (context) in
+            let overrideTraitCollection = self.interfaceProvider.overrideTraitCollection(forSize: size, viewController: installedViewController)
+            self.rootViewController.setOverrideTraitCollection(overrideTraitCollection, forChildViewController: installedViewController)
+        }, completion: nil)
+    }
     
+
 }

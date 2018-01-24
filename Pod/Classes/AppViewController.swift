@@ -23,6 +23,11 @@
 
 import UIKit
 
+public protocol AppViewControllerSizeTransitionProviding {
+    func appViewControllerWillTransition(toTraitCollection:UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator)
+    func appViewControllerWillTransition(toSize size:CGSize, with coordinator: UIViewControllerTransitionCoordinator)
+}
+
 fileprivate let transitionSnapshotTag = 1999
 
 open class AppViewController: UIViewController {
@@ -30,6 +35,7 @@ open class AppViewController: UIViewController {
     /// The view controller that is currently installed.
     open fileprivate(set) var installedViewController: UIViewController?
     
+    open var sizeTransitionProvider: AppViewControllerSizeTransitionProviding?
     
     // MARK: - Overrides
     
@@ -60,6 +66,18 @@ open class AppViewController: UIViewController {
         if let snapshot = view.window?.viewWithTag(transitionSnapshotTag) {
             view.window?.bringSubview(toFront: snapshot)
         }
+    }
+    
+    open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        sizeTransitionProvider?.appViewControllerWillTransition(toSize: size, with: coordinator)
+    }
+    
+    open override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
+        // don't call super, call directly to child installedViewController b/c willTransition
+        // doesn't call in the proper order when transitioning from compact to regular
+        super.willTransition(to: newCollection, with: coordinator)
+        installedViewController?.willTransition(to: newCollection, with: coordinator)
     }
 }
 
