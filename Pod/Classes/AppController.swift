@@ -288,20 +288,20 @@ fileprivate extension AppController {
 extension AppController: AppViewControllerSizeTransitionProviding {
     public func appViewControllerWillTransition(toTraitCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
         guard let installedViewController = rootViewController.installedViewController else { return }
-        let size = rootViewController.view.frame.size
-        coordinator.animate(alongsideTransition: { [unowned self] (context) in
-            let overrideTraitCollection = self.interfaceProvider.overrideTraitCollection(forSize: size, viewController: installedViewController)
-            self.rootViewController.setOverrideTraitCollection(overrideTraitCollection, forChildViewController: installedViewController)
-            }, completion: nil)
+        let overrideTraitCollection = self.interfaceProvider.overrideTraitCollection(forSize: rootViewController.view.frame.size, viewController: installedViewController)
+        self.rootViewController.setOverrideTraitCollection(overrideTraitCollection, forChildViewController: installedViewController)
+        installedViewController.overrideTraitCollection
     }
 
     public func appViewControllerWillTransition(toSize size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         guard let installedViewController = rootViewController.installedViewController else { return }
-        coordinator.animate(alongsideTransition: { [unowned self] (context) in
-            let overrideTraitCollection = self.interfaceProvider.overrideTraitCollection(forSize: size, viewController: installedViewController)
-            self.rootViewController.setOverrideTraitCollection(overrideTraitCollection, forChildViewController: installedViewController)
-        }, completion: nil)
+        let overrideTraitCollection = self.interfaceProvider.overrideTraitCollection(forSize: size, viewController: installedViewController)
+        self.rootViewController.setOverrideTraitCollection(overrideTraitCollection, forChildViewController: installedViewController)
     }
     
-
+    public func appViewControllerTraitCollectionDidChange(previousTraitCollection: UITraitCollection?) {
+        guard let installedViewController = rootViewController.installedViewController else { return }
+        let overrideTraitCollection = self.interfaceProvider.overrideTraitCollection(forSize: rootViewController.view.frame.size, viewController: installedViewController)
+        self.rootViewController.setOverrideTraitCollection(overrideTraitCollection, forChildViewController: installedViewController)
+    }
 }

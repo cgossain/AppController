@@ -26,6 +26,7 @@ import UIKit
 public protocol AppViewControllerSizeTransitionProviding {
     func appViewControllerWillTransition(toTraitCollection:UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator)
     func appViewControllerWillTransition(toSize size:CGSize, with coordinator: UIViewControllerTransitionCoordinator)
+    func appViewControllerTraitCollectionDidChange(previousTraitCollection: UITraitCollection?)
 }
 
 fileprivate let transitionSnapshotTag = 1999
@@ -69,15 +70,18 @@ open class AppViewController: UIViewController {
     }
     
     open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
         sizeTransitionProvider?.appViewControllerWillTransition(toSize: size, with: coordinator)
+        super.viewWillTransition(to: size, with: coordinator)
     }
     
     open override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
-        // don't call super, call directly to child installedViewController b/c willTransition
-        // doesn't call in the proper order when transitioning from compact to regular
+        sizeTransitionProvider?.appViewControllerWillTransition(toTraitCollection: newCollection, with: coordinator)
         super.willTransition(to: newCollection, with: coordinator)
-        installedViewController?.willTransition(to: newCollection, with: coordinator)
+    }
+    
+    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        sizeTransitionProvider?.appViewControllerTraitCollectionDidChange(previousTraitCollection: previousTraitCollection)
+        super.traitCollectionDidChange(previousTraitCollection)
     }
 }
 
