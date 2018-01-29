@@ -24,7 +24,7 @@
 import UIKit
 
 class StoryboardInterfaceProvider: AppControllerInterfaceProviding {
-    
+
     let storyboard: UIStoryboard
     let loggedOutInterfaceID: String
     let loggedInInterfaceID: String
@@ -55,4 +55,7 @@ class StoryboardInterfaceProvider: AppControllerInterfaceProviding {
         return false
     }
     
+    func overrideTraitCollection(forSize size: CGSize, viewController: UIViewController) -> UITraitCollection? {
+        return nil
+    }
 }

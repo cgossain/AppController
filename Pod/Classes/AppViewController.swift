@@ -23,6 +23,12 @@
 
 import UIKit
 
+public protocol AppViewControllerSizeTransitionProviding {
+    func appViewControllerWillTransition(toTraitCollection:UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator)
+    func appViewControllerWillTransition(toSize size:CGSize, with coordinator: UIViewControllerTransitionCoordinator)
+    func appViewControllerTraitCollectionDidChange(previousTraitCollection: UITraitCollection?)
+}
+
 fileprivate let transitionSnapshotTag = 1999
 
 open class AppViewController: UIViewController {
@@ -30,6 +36,7 @@ open class AppViewController: UIViewController {
     /// The view controller that is currently installed.
     open fileprivate(set) var installedViewController: UIViewController?
     
+    open var sizeTransitionProvider: AppViewControllerSizeTransitionProviding?
     
     // MARK: - Overrides
     
@@ -60,6 +67,21 @@ open class AppViewController: UIViewController {
         if let snapshot = view.window?.viewWithTag(transitionSnapshotTag) {
             view.window?.bringSubview(toFront: snapshot)
         }
+    }
+    
+    open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        sizeTransitionProvider?.appViewControllerWillTransition(toSize: size, with: coordinator)
+        super.viewWillTransition(to: size, with: coordinator)
+    }
+    
+    open override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
+        sizeTransitionProvider?.appViewControllerWillTransition(toTraitCollection: newCollection, with: coordinator)
+        super.willTransition(to: newCollection, with: coordinator)
+    }
+    
+    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        sizeTransitionProvider?.appViewControllerTraitCollectionDidChange(previousTraitCollection: previousTraitCollection)
+        super.traitCollectionDidChange(previousTraitCollection)
     }
 }
 
