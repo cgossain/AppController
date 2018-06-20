@@ -119,49 +119,57 @@ fileprivate extension AppViewController {
             let presentedTransitionViews = window.subviewsWithClassName("UITransitionView")
             presentedTransitionViews.forEach { $0.isHidden = true }
             
-            // dismiss the entire presented view controller hierarchy without animation
-            self.dismiss(animated: false, completion: nil)
-            
-            // notify the `fromViewController` is about to be removed
-            fromViewController.willMove(toParentViewController: nil)
-            
-            // add the `toViewController` as a child
-            self.addChildViewController(toViewController)
-            self.view.addSubview(toViewController.view)
-            
-            // fill the bounds
-            toViewController.view.translatesAutoresizingMaskIntoConstraints = false
-            toViewController.view.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
-            toViewController.view.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
-            toViewController.view.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
-            toViewController.view.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
-            
-            // update the current reference (needs to be updated for the `setNeedsStatusBarAppearanceUpdate()` call in the animation block)
-            self.installedViewController = toViewController
-            
-            // decontain the `fromViewController`
-            fromViewController.view.removeFromSuperview()
-            fromViewController.removeFromParentViewController()
-            
-            // finish containing the `toViewController`
-            toViewController.didMove(toParentViewController: self)
-            
-            // fade out the snapshot to reveal the `toView`; note that the small animation delay allows dismissed presented views to be removed and the hieararchy ready to go before fading out the screenshot view
-            UIView.animate(withDuration: duration, delay: delay, options: .transitionCrossDissolve, animations: {
-                // fade out the snapshot to reveal the update hierarchy
-                snapshot?.alpha = 0.0
+            let performTransition = {
+                // notify the `fromViewController` is about to be removed
+                fromViewController.willMove(toParentViewController: nil)
                 
-                // updating the status bar appearance change within the animation block will animate the status bar color change, if there is one
-                self.setNeedsStatusBarAppearanceUpdate()
+                // add the `toViewController` as a child
+                self.addChildViewController(toViewController)
+                self.view.addSubview(toViewController.view)
                 
-            }, completion: { (finished) in
-                // remove the snapshot
-                snapshot?.removeFromSuperview()
+                // fill the bounds
+                toViewController.view.translatesAutoresizingMaskIntoConstraints = false
+                toViewController.view.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
+                toViewController.view.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
+                toViewController.view.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+                toViewController.view.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
                 
-                // completion handler
-                completionHandler?()
-            })
+                // update the current reference (needs to be updated for the `setNeedsStatusBarAppearanceUpdate()` call in the animation block)
+                self.installedViewController = toViewController
+                
+                // decontain the `fromViewController`
+                fromViewController.view.removeFromSuperview()
+                fromViewController.removeFromParentViewController()
+                
+                // finish containing the `toViewController`
+                toViewController.didMove(toParentViewController: self)
+                
+                // fade out the snapshot to reveal the `toView`; note that the small animation delay allows dismissed presented views to be removed and the hieararchy ready to go before fading out the screenshot view
+                UIView.animate(withDuration: duration, delay: delay, options: .transitionCrossDissolve, animations: {
+                    // fade out the snapshot to reveal the update hierarchy
+                    snapshot?.alpha = 0.0
+                    
+                    // updating the status bar appearance change within the animation block will animate the status bar color change, if there is one
+                    self.setNeedsStatusBarAppearanceUpdate()
+                    
+                }, completion: { (finished) in
+                    // remove the snapshot
+                    snapshot?.removeFromSuperview()
+                    
+                    // completion handler
+                    completionHandler?()
+                })
+            }
             
+            if self.presentedViewController != nil {
+                // dismiss the entire presented view controller hierarchy without animation, performing the transition upon completion
+                // to ensure any presented controllers relationships are severed before transitioning
+                self.dismiss(animated: false, completion: performTransition)
+            }
+            else {
+                // no view controller has been presented, so the transition can be performed immediately
+                performTransition()
+            }
         }
     }
     
