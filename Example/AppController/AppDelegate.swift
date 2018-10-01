@@ -18,7 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return AppController(storyboardName: "Main", loggedOutInterfaceID: "loggedOutInterface", loggedInInterfaceID: "loggedInInterface")
     }()
     
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // install the app controller's root view controller as the root view controller of the window
         window?.rootViewController = appController.rootViewController
         window?.makeKeyAndVisible()
