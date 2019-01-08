@@ -106,8 +106,8 @@ fileprivate extension AppViewController {
         // resign any active first responder before continuing
         window.resignCurrentFirstResponderIfNeeded {
             
-            // take a snapshot of the window state
-            let snapshot = window.snapshotView(afterScreenUpdates: false)
+            // take a snapshot of the window state, allowing any updates to the UI to complete
+            let snapshot = window.snapshotView(afterScreenUpdates: true)
             snapshot?.tag = transitionSnapshotTag
             
             // cover the window with the snapshot
