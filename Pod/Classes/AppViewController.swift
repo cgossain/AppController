@@ -23,16 +23,16 @@
 
 import UIKit
 
-fileprivate let transitionSnapshotTag = 1999
-
 open class AppViewController: UIViewController {
+    private struct Metrics {
+        static let snapshotTag = 1999
+    }
     
     /// The view controller that is currently installed.
     open fileprivate(set) var installedViewController: UIViewController?
     
     
-    // MARK: - Overrides
-    
+    // MARK: - Lifecycle
     open override var childForStatusBarStyle : UIViewController? {
         return installedViewController
     }
@@ -57,7 +57,7 @@ open class AppViewController: UIViewController {
         super.viewWillLayoutSubviews()
         
         // force the window snapshot to stay on top; this is useful when other subviews are added during the transition (i.e. a presentation, split view master panel in portrait mode, etc.)
-        if let snapshot = view.window?.viewWithTag(transitionSnapshotTag) {
+        if let snapshot = view.window?.viewWithTag(Metrics.snapshotTag) {
             view.window?.bringSubviewToFront(snapshot)
         }
     }
@@ -107,7 +107,7 @@ fileprivate extension AppViewController {
             let performTransition = {
                 // take a snapshot of the window state, allowing any updates to the UI to complete
                 let snapshot = window.snapshotView(afterScreenUpdates: true)
-                snapshot?.tag = transitionSnapshotTag
+                snapshot?.tag = Metrics.snapshotTag
                 
                 // cover the window with the snapshot
                 if let snapshot = snapshot {
