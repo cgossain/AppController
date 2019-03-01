@@ -104,20 +104,20 @@ fileprivate extension AppViewController {
     func transitionBySnapshotting(from fromViewController: UIViewController, to toViewController: UIViewController, in window: UIWindow, duration: TimeInterval, delay: TimeInterval, completionHandler: (() -> Void)?) {
         // resign any active first responder before continuing
         window.resignCurrentFirstResponderIfNeeded {
-            // take a snapshot of the window state, allowing any updates to the UI to complete
-            let snapshot = window.snapshotView(afterScreenUpdates: true)
-            snapshot?.tag = transitionSnapshotTag
-            
-            // cover the window with the snapshot
-            if let snapshot = snapshot {
-                window.addSubview(snapshot)
-            }
-            
-            // hide all transition views immediately
-            let presentedTransitionViews = window.subviewsWithClassName("UITransitionView")
-            presentedTransitionViews.forEach { $0.isHidden = true }
-            
             let performTransition = {
+                // take a snapshot of the window state, allowing any updates to the UI to complete
+                let snapshot = window.snapshotView(afterScreenUpdates: true)
+                snapshot?.tag = transitionSnapshotTag
+                
+                // cover the window with the snapshot
+                if let snapshot = snapshot {
+                    window.addSubview(snapshot)
+                }
+                
+                // hide all transition views immediately
+                let presentedTransitionViews = window.subviewsWithClassName("UITransitionView")
+                presentedTransitionViews.forEach { $0.isHidden = true }
+                
                 // notify the `fromViewController` is about to be removed
                 fromViewController.willMove(toParent: nil)
                 
@@ -159,6 +159,7 @@ fileprivate extension AppViewController {
                 })
             }
             
+            // perform the transition
             if self.presentedViewController != nil {
                 // dismiss the entire presented view controller hierarchy without animation
                 self.dismiss(animated: false, completion: nil)
