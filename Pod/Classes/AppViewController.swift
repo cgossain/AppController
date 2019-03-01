@@ -160,9 +160,17 @@ fileprivate extension AppViewController {
             }
             
             if self.presentedViewController != nil {
-                // dismiss the entire presented view controller hierarchy without animation, performing the transition upon completion
-                // to ensure any presented controllers relationships are severed before transitioning
-                self.dismiss(animated: false, completion: performTransition)
+                // dismiss the entire presented view controller hierarchy without animation
+                self.dismiss(animated: false, completion: nil)
+                
+                // wait for dismissal to complete to ensure any presented controllers relationships
+                // are severed before transitioning; note that I was previously doing this in the
+                // completion handler of the dismiss method, however at this time there seem to be
+                // a bug where the completion handler is not called upon dismissal completion, therefore
+                // I am instead waiting for a small delay of 300ms before performing the transition
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    performTransition()
+                }
             }
             else {
                 // no view controller has been presented, so the transition can be performed immediately
