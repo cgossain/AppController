@@ -99,13 +99,11 @@ extension AppViewController {
 }
 
 fileprivate extension AppViewController {
-    
-    /// Technique #1: Transition is performed by resigning first responder, then snapshotting the entire window. The snapshot is placed on top of all other window subviews while
-    /// the underlying hierarchy is changed. Finally the snapshot is faded out, and removed to reveal the updated view hierarchy.
+    /// Technique #1: Transition is performed by resigning first responder, then snapshotting the entire window. The snapshot is placed on top of all
+    /// other window subviews while the underlying hierarchy is changed. Finally the snapshot is faded out, and removed to reveal the updated view hierarchy.
     func transitionBySnapshotting(from fromViewController: UIViewController, to toViewController: UIViewController, in window: UIWindow, duration: TimeInterval, delay: TimeInterval, completionHandler: (() -> Void)?) {
         // resign any active first responder before continuing
         window.resignCurrentFirstResponderIfNeeded {
-            
             // take a snapshot of the window state, allowing any updates to the UI to complete
             let snapshot = window.snapshotView(afterScreenUpdates: true)
             snapshot?.tag = transitionSnapshotTag
@@ -174,10 +172,11 @@ fileprivate extension AppViewController {
     }
     
     /// Technique #2: Transition keeps the topmost UITransitionView visible, but hides all other ones (i.e. when there are multiple presentations overlayed). The topmost UITransitionView is faded out as the `toView` is faded in.
+    ///
+    /// - Note: This method is not currently being used. I've kept it for reference.
     func transitionByDismissing(from fromViewController: UIViewController, to toViewController: UIViewController, in window: UIWindow, duration: TimeInterval, delay: TimeInterval, completionHandler: (() -> Void)?) {
         // resign any active first responder before continuing
         window.resignCurrentFirstResponderIfNeeded {
-            
             // notify the `fromViewController` is about to be removed
             fromViewController.willMove(toParent: nil)
             
@@ -234,7 +233,6 @@ fileprivate extension AppViewController {
                 // completion handler
                 completionHandler?()
             })
-            
         }
     }
     
