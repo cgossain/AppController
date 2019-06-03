@@ -1,11 +1,12 @@
-source 'https://github.com/CocoaPods/Specs.git'
-use_frameworks!
 platform :ios, '10.3'
+use_frameworks!
 
 target 'AppController_Example' do
   pod "AppController", :path => "../"
-end
 
-target 'AppController_Tests' do
-  pod "AppController", :path => "../"
+  target 'AppController_Tests' do
+    inherit! :search_paths
+
+
+  end
 end
