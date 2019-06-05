@@ -112,11 +112,14 @@ fileprivate extension AppViewController {
             if let snapshot = snapshot {
                 window.addSubview(snapshot)
             }
-            
-            // hide all transition views immediately
-            let presentedTransitionViews = window.subviewsWithClassName("UITransitionView")
-            presentedTransitionViews.forEach { $0.isHidden = true }
-            
+
+            if #available(iOS 13.0, *) {}
+            else {
+                // hide all transition views immediately
+                let presentedTransitionViews = window.subviewsWithClassName("UITransitionView")
+                presentedTransitionViews.forEach { $0.isHidden = true }
+            }
+
             // build the transition block
             let performTransition = {
                 // notify the `fromViewController` is about to be removed
