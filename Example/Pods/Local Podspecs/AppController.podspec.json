@@ -15,6 +15,7 @@
   "platforms": {
     "ios": "10.3"
   },
-  "swift_version": "5.0",
-  "source_files": "AppController/Classes/**/*.swift"
+  "swift_versions": "5.0",
+  "source_files": "AppController/Classes/**/*.swift",
+  "swift_version": "5.0"
 }
