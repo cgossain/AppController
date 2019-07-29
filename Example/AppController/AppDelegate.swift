@@ -19,24 +19,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // install the app controller's root view controller as the root view controller of the window
-        window?.rootViewController = appController.rootViewController
-        window?.makeKeyAndVisible()
-        
-        // note that the AppController initially loads the `logged out` interface
-        // simulating an event that triggers switching to the `logged in` interface (i.e. auth observer firing, button tapped, etc.)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            // this will notify any active AppController instance to transition to the `logged in` interface
-            AppController.login()
-            
-            // now simulate the log out
-            // simulating an event that triggers switching to the `logged out` interface (i.e. auth observer firing, button tapped, etc.)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                // this will notify any active AppController instance to transition to the `logged out` interface
-                AppController.logout()
-            }
+        // install the app controller's interface into the window
+        if let window = window {
+            appController.installRootViewController(in: window)
         }
-        
         return true
     }
 
