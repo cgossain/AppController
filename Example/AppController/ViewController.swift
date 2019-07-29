@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AppController
 
 class ViewController: UIViewController {
 
@@ -27,5 +28,14 @@ class ViewController: UIViewController {
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .allButUpsideDown
     }
+    
+    @IBAction func logInButtonTapped(_ sender: Any) {
+        AppController.login()
+    }
+    
+    @IBAction func logOutButtonTapped(_ sender: Any) {
+        AppController.logout()
+    }
+    
 }
 
