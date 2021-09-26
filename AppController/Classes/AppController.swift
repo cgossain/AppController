@@ -24,40 +24,6 @@
 
 import UIKit
 
-public protocol AppControllerInterfaceProviding {
-    /// Return a configuration object describing the transition parameters.
-    ///
-    /// - Parameters:
-    ///     - controller: The app controller instance requesting the configuration.
-    ///     - traitCollection: The current trait collection of the root view controller.
-    /// - Returns: A configuration model describing the transition parameters.
-    func configuration(for controller: AppController, traitCollection: UITraitCollection) -> AppController.Configuration
-    
-    /// Return the view controller to be installed as the "logged out" interface.
-    ///
-    /// - Parameters:
-    ///     - controller: The app controller instance requesting the configuration.
-    /// - Returns: A view controller to install as the logged out interface.
-    ///
-    func loggedOutInterfaceViewController(for controller: AppController) -> UIViewController
-    
-    /// Return the view controller to be installed as the "logged in" interface.
-    ///
-    /// - Parameters:
-    ///     - controller: The app controller instance requesting the configuration.
-    /// - Returns: A view controller to install as the logged in interface.
-    ///
-    func loggedInInterfaceViewController(for controller: AppController) -> UIViewController
-    
-    /// Return true if the "logged in" interface should be initially loaded, or false if the "logged out" interface is initially loaded.
-    ///
-    /// - Parameters:
-    ///     - controller: The app controller instance requesting the configuration.
-    /// - Returns: `true` if the logged in interface should be initially presented, `false` otherwise.
-    ///
-    func isInitiallyLoggedIn(for controller: AppController) -> Bool
-}
-
 public class AppController {
     public struct Configuration {
         /// The animation duration when transitionning between logged in/out states. A duration of zero
@@ -82,7 +48,7 @@ public class AppController {
     }
     
     /// The object that acts as the interface provider for the controller.
-    let interfaceProvider: AppControllerInterfaceProviding
+    public let interfaceProvider: AppControllerInterfaceProviding
     
     /// A closure that is called just before the transition to the _logged in_ interface begins. The view
     /// controller that is about to be presented is passed to the block as the targetViewController.
@@ -122,6 +88,7 @@ public class AppController {
     
     
     // MARK: - Lifecycle
+    
     /// Initializes the controller using the specified storyboard name, and uses the given `loggedOutInterfaceID`, and `loggedInInterfaceID` values to instantiate 
     /// the appropriate view controller from the storyboad.
     ///
@@ -186,19 +153,20 @@ public class AppController {
     }
     
     
-    // MARK: - Internal Use
-    fileprivate var appViewControllerClass = AppViewController.self
-    fileprivate var loginNotificationObserver: AnyObject?
-    fileprivate var logoutNotificationObserver: AnyObject?
+    // MARK: - Internal
+    
+    private var appViewControllerClass = AppViewController.self
+    private var loginNotificationObserver: AnyObject?
+    private var logoutNotificationObserver: AnyObject?
     
 }
 
 extension AppController {
     /// Internal notification that is posted on `AppController.login()`.
-    fileprivate static let shouldLoginNotification = Notification.Name(rawValue: "AppControllerShouldLoginNotification")
+    private static let shouldLoginNotification = Notification.Name(rawValue: "AppControllerShouldLoginNotification")
     
     /// Internal notification that is posted on `AppController.logout()`.
-    fileprivate static let shouldLogoutNotification = Notification.Name(rawValue: "AppControllerShouldLogoutNotification")
+    private static let shouldLogoutNotification = Notification.Name(rawValue: "AppControllerShouldLogoutNotification")
     
     /// Installs the receivers' instance of `AppViewController` as the windows' `rootViewController`, then calls `makeKeyAndVisible()` on
     /// the window, and finally transtitions to the initial interface.
@@ -231,8 +199,8 @@ extension AppController {
     }
 }
 
-fileprivate extension AppController {
-    func transitionToLoggedInInterface(notify: Bool = true) {
+extension AppController {
+    private func transitionToLoggedInInterface(notify: Bool = true) {
         let target = interfaceProvider.loggedInInterfaceViewController(for: self)
         let configuration = interfaceProvider.configuration(for: self, traitCollection: rootViewController.traitCollection)
         rootViewController.transition(to: target, configuration: configuration, willBeginTransition: { [weak self] in
@@ -254,7 +222,7 @@ fileprivate extension AppController {
         })
     }
     
-    func transitionToLoggedOutInterface(notify: Bool = true) {
+    private func transitionToLoggedOutInterface(notify: Bool = true) {
         let target = interfaceProvider.loggedOutInterfaceViewController(for: self)
         let configuration = interfaceProvider.configuration(for: self, traitCollection: rootViewController.traitCollection)
         rootViewController.transition(to: target, configuration: configuration, willBeginTransition: { [weak self] in
