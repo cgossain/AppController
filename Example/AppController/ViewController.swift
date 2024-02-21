@@ -36,6 +36,4 @@ class ViewController: UIViewController {
     @IBAction func logOutButtonTapped(_ sender: Any) {
         AppController.logout()
     }
-    
 }
-
