@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'AppController'
-  s.version          = '2.0.0'
+  s.version          = '2.1.0'
   s.summary          = 'A lightweight controller for managing transitions between "unauthenticated" and "authenticated" interfaces on iOS, written in Swift.'
   s.description      = <<-DESC
   The AppController is a lightweight controller for managing transitions 
@@ -18,8 +18,9 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/cgossain/AppController'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Christian Gossain' => 'cgossain@gmail.com' }
+
   s.source           = { :git => 'https://github.com/cgossain/AppController.git', :tag => s.version.to_s }
-  s.platform         = :ios, '10.3'
+  s.source_files     = 'Sources/AppController/**/*'
+  s.ios.deployment_target = '13.0'
   s.swift_version = '5.0'
-  s.source_files = 'AppController/Classes/**/*.swift'
 end
