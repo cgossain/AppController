@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   code and build more compelling onboarding experiences.
                        DESC
   s.homepage         = 'https://github.com/cgossain/AppController'
-  s.license          = 'MIT'
+  s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Christian Gossain' => 'cgossain@gmail.com' }
   s.source           = { :git => 'https://github.com/cgossain/AppController.git', :tag => s.version.to_s }
   s.platform         = :ios, '10.3'
