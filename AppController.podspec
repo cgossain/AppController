@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'AppController'
-  s.version          = '2.1.0'
+  s.version          = '2.2.0'
   s.summary          = 'A lightweight controller for managing transitions between "unauthenticated" and "authenticated" interfaces on iOS, written in Swift.'
   s.description      = <<-DESC
   The AppController is a lightweight controller for managing transitions 

@@ -24,36 +24,41 @@
 
 import UIKit
 
-class StoryboardInterfaceProvider {
+final class StoryboardInterfaceProvider: AppControllerInterfaceProviding {
     let storyboard: UIStoryboard
     let loggedOutInterfaceID: String
     let loggedInInterfaceID: String
     let configuration: AppController.Configuration
     
+    // MARK: - Init
     
-    // MARK: - Lifecycle
-    init(storyboard: UIStoryboard, loggedOutInterfaceID: String, loggedInInterfaceID: String, configuration: AppController.Configuration) {
+    init(
+        storyboard: UIStoryboard,
+        loggedOutInterfaceID: String,
+        loggedInInterfaceID: String,
+        configuration: AppController.Configuration
+    ) {
         self.storyboard = storyboard
         self.loggedOutInterfaceID = loggedOutInterfaceID
         self.loggedInInterfaceID = loggedInInterfaceID
         self.configuration = configuration
     }
-}
-
-extension StoryboardInterfaceProvider: AppControllerInterfaceProviding {
+    
+    // MARK: - AppControllerInterfaceProviding
+    
     func configuration(for appController: AppController, traitCollection: UITraitCollection) -> AppController.Configuration {
-        return configuration
+        configuration
     }
     
     func loggedOutInterfaceViewController(for appController: AppController) -> UIViewController {
-        return storyboard.instantiateViewController(withIdentifier: loggedOutInterfaceID)
+        storyboard.instantiateViewController(withIdentifier: loggedOutInterfaceID)
     }
     
     func loggedInInterfaceViewController(for appController: AppController) -> UIViewController {
-        return storyboard.instantiateViewController(withIdentifier: loggedInInterfaceID)
+        storyboard.instantiateViewController(withIdentifier: loggedInInterfaceID)
     }
     
     func isInitiallyLoggedIn(for appController: AppController) -> Bool {
-        return false
+        false
     }
 }

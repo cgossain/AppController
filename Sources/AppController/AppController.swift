@@ -24,7 +24,43 @@
 
 import UIKit
 
+public protocol AppControllerInterfaceProviding {
+    /// Return a configuration object describing the transition parameters.
+    ///
+    /// - Parameters:
+    ///     - controller: The app controller instance requesting the configuration.
+    ///     - traitCollection: The current trait collection of the root view controller.
+    /// - Returns: A configuration model describing the transition parameters.
+    func configuration(for controller: AppController, traitCollection: UITraitCollection) -> AppController.Configuration
+    
+    /// Return the view controller to be installed as the "logged out" interface.
+    ///
+    /// - Parameters:
+    ///     - controller: The app controller instance requesting the configuration.
+    /// - Returns: A view controller to install as the logged out interface.
+    ///
+    func loggedOutInterfaceViewController(for controller: AppController) -> UIViewController
+    
+    /// Return the view controller to be installed as the "logged in" interface.
+    ///
+    /// - Parameters:
+    ///     - controller: The app controller instance requesting the configuration.
+    /// - Returns: A view controller to install as the logged in interface.
+    ///
+    func loggedInInterfaceViewController(for controller: AppController) -> UIViewController
+    
+    /// Return true if the "logged in" interface should be initially loaded, or false if the "logged out" interface is initially loaded.
+    ///
+    /// - Parameters:
+    ///     - controller: The app controller instance requesting the configuration.
+    /// - Returns: `true` if the logged in interface should be initially presented, `false` otherwise.
+    ///
+    func isInitiallyLoggedIn(for controller: AppController) -> Bool
+}
+
 public class AppController {
+    
+    /// The configuration.
     public struct Configuration {
         /// The animation duration when transitionning between logged in/out states. A duration of zero
         /// indicates no animation should occur.
@@ -41,7 +77,10 @@ public class AppController {
         public var dismissesPresentedViewControllerOnTransition = true
         
         /// Initializes the configuration with the given options.
-        public init(transitionDuration: TimeInterval = 0.6, dismissesPresentedViewControllerOnTransition: Bool = true) {
+        public init(
+            transitionDuration: TimeInterval = 0.6,
+            dismissesPresentedViewControllerOnTransition: Bool = true
+        ) {
             self.transitionDuration = transitionDuration
             self.dismissesPresentedViewControllerOnTransition = dismissesPresentedViewControllerOnTransition
         }
@@ -86,31 +125,49 @@ public class AppController {
         return (interfaceProvider as? StoryboardInterfaceProvider)?.storyboard
     }
     
+    // MARK: - Init
     
-    // MARK: - Lifecycle
-    
-    /// Initializes the controller using the specified storyboard name, and uses the given `loggedOutInterfaceID`, and `loggedInInterfaceID` values to instantiate 
-    /// the appropriate view controller from the storyboad.
+    /// Initializer.
+    ///
+    /// Initializes the controller using the specified storyboard name, and uses the given `loggedOutInterfaceID`, and `loggedInInterfaceID` values
+    /// to instantiate the appropriate view controller from the storyboad.
     ///
     /// - Parameters:
     ///     - storyboardName: The name of the storyboard that contains the view controllers.
     ///     - loggedOutInterfaceID: The storyboard identifier of the view controller to use as the _logged out_ view controller.
     ///     - loggedInInterfaceID: The storyboard identifier of the view controller to use as the _logged in_ view controller.
-    /// - Note: The controller automatically installs the _initial view controller_ from the storyboard as the root view
-    ///         controller. Therfore, the _initial view controller_ in the specified storyboard MUST be an instance
-    ///         of `AppViewController`, otherwise a crash will occur.
-    public convenience init(storyboardName: String, loggedOutInterfaceID: String, loggedInInterfaceID: String, configuration: AppController.Configuration = Configuration()) {
+    ///     - configuration: The configuration.
+    ///
+    /// - Note: The controller automatically installs the _initial view controller_ from the storyboard
+    ///         as the root view controller. Therfore, the _initial view controller_ in the specified
+    ///         storyboard MUST be an instance of `AppViewController`, otherwise a crash will occur.
+    public convenience init(
+        storyboardName: String,
+        loggedOutInterfaceID: String,
+        loggedInInterfaceID: String,
+        configuration: AppController.Configuration = Configuration()
+    ) {
         let storyboard = UIStoryboard(name: storyboardName, bundle: nil)
-        let provider = StoryboardInterfaceProvider(storyboard: storyboard, loggedOutInterfaceID: loggedOutInterfaceID, loggedInInterfaceID: loggedInInterfaceID, configuration: configuration)
+        let provider = StoryboardInterfaceProvider(
+            storyboard: storyboard,
+            loggedOutInterfaceID: loggedOutInterfaceID,
+            loggedInInterfaceID: loggedInInterfaceID,
+            configuration: configuration
+        )
         self.init(interfaceProvider: provider)
     }
     
+    /// Initializer.
+    ///
     /// Initializes the controller with closures that return the view controllers to install for the _logged out_ and _logged in_ states.
     ///
     /// - Parameters:
     ///     - interfaceProvider: The object that will act as the interface provider for the controller.
     ///     - appViewControllerClass: Specify a custom `AppViewController` subclass to use as the rootViewController, or `nil` to use the standard `AppViewController`.
-    public init(interfaceProvider: AppControllerInterfaceProviding, appViewControllerClass: AppViewController.Type? = nil) {
+    public init(
+        interfaceProvider: AppControllerInterfaceProviding,
+        appViewControllerClass: AppViewController.Type? = nil
+    ) {
         self.interfaceProvider = interfaceProvider
         
         // replace the default AppViewController class with the custom class, if provided
@@ -119,54 +176,39 @@ public class AppController {
         }
         
         // observe login notifications
-        loginNotificationObserver =
-            NotificationCenter.default.addObserver(
-                forName: AppController.shouldLoginNotification,
-                object: nil,
-                queue: .main,
-                using: { [weak self] notification in
-                    guard let strongSelf = self else {
-                        return
+        observers.append(
+            NotificationCenter
+                .default
+                .addObserver(
+                    forName: AppController.shouldLoginNotification,
+                    object: nil,
+                    queue: .main,
+                    using: { [weak self] notification in
+                        self?.transitionToLoggedInInterface()
                     }
-                    
-                    strongSelf.transitionToLoggedInInterface()
-            })
+                )
+        )
         
         // observe logout notifications
-        logoutNotificationObserver =
-            NotificationCenter.default.addObserver(
-                forName: AppController.shouldLogoutNotification,
-                object: nil,
-                queue: .main,
-                using: { [weak self] notification in
-                    guard let strongSelf = self else {
-                        return
+        observers.append(
+            NotificationCenter
+                .default
+                .addObserver(
+                    forName: AppController.shouldLogoutNotification,
+                    object: nil,
+                    queue: .main,
+                    using: { [weak self] notification in
+                        self?.transitionToLoggedOutInterface()
                     }
-                    
-                    strongSelf.transitionToLoggedOutInterface()
-            })
+                )
+        )
     }
     
     deinit {
-        NotificationCenter.default.removeObserver(loginNotificationObserver!)
-        NotificationCenter.default.removeObserver(logoutNotificationObserver!)
+        observers.forEach { NotificationCenter.default.removeObserver($0) }
     }
     
-    
-    // MARK: - Internal
-    
-    private var appViewControllerClass = AppViewController.self
-    private var loginNotificationObserver: AnyObject?
-    private var logoutNotificationObserver: AnyObject?
-    
-}
-
-extension AppController {
-    /// Internal notification that is posted on `AppController.login()`.
-    private static let shouldLoginNotification = Notification.Name(rawValue: "AppControllerShouldLoginNotification")
-    
-    /// Internal notification that is posted on `AppController.logout()`.
-    private static let shouldLogoutNotification = Notification.Name(rawValue: "AppControllerShouldLogoutNotification")
+    // MARK: - API
     
     /// Installs the receivers' instance of `AppViewController` as the windows' `rootViewController`, then calls `makeKeyAndVisible()` on
     /// the window, and finally transtitions to the initial interface.
@@ -178,8 +220,7 @@ extension AppController {
         // transtion to the initial interface; since handlers should already be aware of their desired initial interface, they shouldn't be notified here
         if interfaceProvider.isInitiallyLoggedIn(for: self) {
             transitionToLoggedInInterface(notify: false)
-        }
-        else {
+        } else {
             transitionToLoggedOutInterface(notify: false)
         }
     }
@@ -188,18 +229,30 @@ extension AppController {
     /// Note that any given app should only have a single active AppController instance. Therefore that single instance
     /// will be the one that receives and handles the notification.
     public static func login() {
-        NotificationCenter.default.post(name: AppController.shouldLoginNotification, object: nil, userInfo: nil)
+        NotificationCenter
+            .default
+            .post(
+                name: AppController.shouldLoginNotification,
+                object: nil,
+                userInfo: nil
+            )
     }
     
     /// Posts a notification that notifies any active AppController instance to switch to its _logged out_ interface.
     /// Note that any given app should only have a single active AppController instance. Therefore that single instance
     /// will be the one that receives and handles the notification.
     public static func logout() {
-        NotificationCenter.default.post(name: AppController.shouldLogoutNotification, object: nil, userInfo: nil)
+        NotificationCenter
+            .default
+            .post(
+                name: AppController.shouldLogoutNotification,
+                object: nil,
+                userInfo: nil
+            )
     }
-}
-
-extension AppController {
+    
+    // MARK: - Helpers
+    
     private func transitionToLoggedInInterface(notify: Bool = true) {
         let target = interfaceProvider.loggedInInterfaceViewController(for: self)
         let configuration = interfaceProvider.configuration(for: self, traitCollection: rootViewController.traitCollection)
@@ -243,4 +296,15 @@ extension AppController {
             }
         })
     }
+    
+    // MARK: - Private
+    
+    /// Internal notification that is posted on `AppController.login()`.
+    private static let shouldLoginNotification = Notification.Name(rawValue: "AppControllerShouldLoginNotification")
+    
+    /// Internal notification that is posted on `AppController.logout()`.
+    private static let shouldLogoutNotification = Notification.Name(rawValue: "AppControllerShouldLogoutNotification")
+    
+    private var appViewControllerClass = AppViewController.self
+    private var observers: [AnyObject] = []
 }
